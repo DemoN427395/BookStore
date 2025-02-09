@@ -1,5 +1,4 @@
 ﻿using AuthTokenService.Constants;
-using AuthTokenService.DTOs;
 using AuthTokenService.Interfaces;
 using AuthTokenService.Models;
 using Microsoft.AspNetCore.Identity;
@@ -41,7 +40,7 @@ public class AuthController : ControllerBase
             var existingUser = await _userManager.FindByNameAsync(model.Email);
             if (existingUser != null)
             {
-                return BadRequest("User already exists");
+                return BadRequest(new { message = "User already exists" });
             }
 
             // Create User role if it doesn't exist
@@ -89,7 +88,9 @@ public class AuthController : ControllerBase
                 var errors = addUserToRoleResult.Errors.Select(e => e.Description);
                 _logger.LogError($"Failed to add role to the user. Errors : {string.Join(",", errors)}");
             }
-            return CreatedAtAction(nameof(Signup), null);
+            // return CreatedAtAction(nameof(Signup), null);
+            return CreatedAtAction(nameof(Signup), new { id = model.Name }, model);
+
         }
         catch (Exception ex)
         {
@@ -145,7 +146,7 @@ public class AuthController : ControllerBase
                     RefreshToken = refreshToken,
                     ExpiredAt = DateTime.UtcNow.AddDays(7)
                 };
-                _context.TokenInfos.Add(ti);
+                _context.TokenInfos.Add(ti);    
             }
             // Else, update the refresh token and expiration
             else
@@ -195,5 +196,4 @@ public class AuthController : ControllerBase
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
     }
-
 }

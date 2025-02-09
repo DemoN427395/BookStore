@@ -1,4 +1,3 @@
-
 using System.Text;
 using AuthTokenService.Interfaces;
 using AuthTokenService.Models;
@@ -10,16 +9,29 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace AuthTokenService
 {
-    public class Program
+    public class AuthTokenService
     {
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Добавлено: регистрация контроллеров
+            // Регистрация контроллеров
             builder.Services.AddControllers();
 
+            // Добавление политики CORS, разрешающей все источники
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                });
+            });
+
             string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+            builder.Services.AddHostedService<MigrationHostedService>();
 
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(connectionString));
@@ -29,11 +41,11 @@ namespace AuthTokenService
                 .AddDefaultTokenProviders();
 
             builder.Services.AddAuthentication(options =>
-                {
-                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-                })
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
                 .AddJwtBearer(options =>
                 {
                     options.TokenValidationParameters = new TokenValidationParameters
@@ -51,6 +63,16 @@ namespace AuthTokenService
             builder.Services.AddScoped<ITokenService, TokenService>();
 
             var app = builder.Build();
+
+            // Применение миграций
+            using (var scope = app.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                context.Database.Migrate();
+            }
+
+            // Использование CORS middleware с политикой "AllowAll" (до аутентификации и авторизации)
+            app.UseCors("AllowAll");
 
             app.UseAuthentication();
             app.UseAuthorization();

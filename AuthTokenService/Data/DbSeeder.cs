@@ -8,10 +8,8 @@ public class DbSeeder
 {
     public static async Task SeedData(IApplicationBuilder app)
     {
-        // Create a scoped service provider to resolve dependencies
         using var scope = app.ApplicationServices.CreateScope();
 
-        // resolve the logger service
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<DbSeeder>>();
 
         try
