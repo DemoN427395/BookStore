@@ -16,8 +16,8 @@ public class AuthController : ControllerBase
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly ILogger<AuthController> _logger;
-    private readonly ITokenService _tokenService; // new code
-    private readonly AppDbContext _context; // new code
+    private readonly ITokenService _tokenService;
+    private readonly AppDbContext _context;
 
     public AuthController(UserManager<ApplicationUser> userManager,
         RoleManager<IdentityRole> roleManager,
@@ -27,8 +27,8 @@ public class AuthController : ControllerBase
         _userManager = userManager;
         _roleManager = roleManager;
         _logger = logger;
-        _tokenService = tokenService;  // new code
-        _context = context; // new code
+        _tokenService = tokenService;
+        _context = context;
 
     }
 
@@ -66,11 +66,8 @@ public class AuthController : ControllerBase
                 EmailConfirmed = true
             };
 
-            // Attempt to create a user
             var createUserResult = await _userManager.CreateAsync(user, model.Password);
 
-            // Validate user creation. If user is not created, log the error and
-            // return the BadRequest along with the errors
             if (createUserResult.Succeeded == false)
             {
                 var errors = createUserResult.Errors.Select(e => e.Description);
@@ -80,7 +77,6 @@ public class AuthController : ControllerBase
                 return BadRequest($"Failed to create user. Errors: {string.Join(", ", errors)}");
             }
 
-            // adding role to user
             var addUserToRoleResult = await _userManager.AddToRoleAsync(user: user, role: Roles.User);
 
             if (addUserToRoleResult.Succeeded == false)
@@ -88,7 +84,6 @@ public class AuthController : ControllerBase
                 var errors = addUserToRoleResult.Errors.Select(e => e.Description);
                 _logger.LogError($"Failed to add role to the user. Errors : {string.Join(",", errors)}");
             }
-            // return CreatedAtAction(nameof(Signup), null);
             return CreatedAtAction(nameof(Signup), new { id = model.Name }, model);
 
         }
@@ -103,7 +98,7 @@ public class AuthController : ControllerBase
     {
         try
         {
-            var user = await _userManager.FindByNameAsync(model.Username);
+            var user = await _userManager.FindByNameAsync(model.Email);
             if (user == null)
             {
                 return BadRequest("User with this username is not registered with us.");
@@ -114,7 +109,6 @@ public class AuthController : ControllerBase
                 return Unauthorized();
             }
 
-            // creating the necessary claims
             List<Claim> authClaims = [
                 new (ClaimTypes.Name, user.UserName),
                 new (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
@@ -122,22 +116,18 @@ public class AuthController : ControllerBase
 
             var userRoles = await _userManager.GetRolesAsync(user);
 
-            // adding roles to the claims. So that we can get the user role from the token.
             foreach (var userRole in userRoles)
             {
                 authClaims.Add(new Claim(ClaimTypes.Role, userRole));
             }
 
-            // generating access token
             var token = _tokenService.GenerateAccessToken(authClaims);
 
             string refreshToken = _tokenService.GenerateRefreshToken();
 
-            //save refreshToken with exp date in the database
             var tokenInfo = _context.TokenInfos.
                         FirstOrDefault(a => a.Username == user.UserName);
 
-            // If tokenInfo is null for the user, create a new one
             if (tokenInfo == null)
             {
                 var ti = new TokenInfo

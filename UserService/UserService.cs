@@ -1,10 +1,10 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.IdentityModel.Tokens;
 using UserService.Models;
+
+// добавить аутентификацию во всем микросервисы
 
 namespace UserService
 {
@@ -14,26 +14,13 @@ namespace UserService
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Добавлено: регистрация контроллеров
-            builder.Services.AddControllers();
-
-            string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
-            builder.Services.AddHostedService<MigrationHostedService>();
-
-            builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseNpgsql(connectionString));
-
-            builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<AppDbContext>()
-                .AddDefaultTokenProviders();
-
+            // Настройка аутентификации JWT
             builder.Services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
+                {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
                 .AddJwtBearer(options =>
                 {
                     options.TokenValidationParameters = new TokenValidationParameters
@@ -48,16 +35,10 @@ namespace UserService
                 });
 
             builder.Services.AddAuthorization();
-            builder.Services.AddScoped<ITokenService, TokenService>();
+            builder.Services.AddControllers();
+
 
             var app = builder.Build();
-
-            using (var scope = app.Services.CreateScope())
-            {
-                var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                context.Database.Migrate();
-            }
-
 
             app.UseAuthentication();
             app.UseAuthorization();
