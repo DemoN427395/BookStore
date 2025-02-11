@@ -49,11 +49,13 @@ POST /api/auth/signup
 
 Пример запроса (JSON):
 
-`{
+```json
+{
   "Email": "user@example.com",
   "Password": "YourPassword123!",
   "Name": "User Name"
-}`
+}
+```
 
 Ответ:
 
@@ -79,17 +81,21 @@ POST /api/auth/login
 
 Пример запроса (JSON):
 
-`{
+```json
+{
   "Email": "user@example.com",
   "Password": "YourPassword123!"
-}`
+}
+```
 
 Пример успешного ответа (JSON):
 
-`{
+```json
+{
   "AccessToken": "jwt_access_token",
   "RefreshToken": "refresh_token"
-}`
+}
+```
 
 Ответ:
 
@@ -135,7 +141,9 @@ GET /api/user
 
 Ответ:
 
-`{
+```json
+{
   "Message": "User Data",
   "User": "user@example.com"
-}`
+}
+```
