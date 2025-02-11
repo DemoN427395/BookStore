@@ -1,4 +1,15 @@
-## Установка
+## Установка Postgre в Docker
+
+Создайте .env:
+```bash
+POSTGRES_PASSWORD=your_password
+```
+
+```bash
+docker-compose up -d
+```
+
+## Установка AuthTokenService
 
 ```bash
 dotnet user-secrets init
@@ -8,6 +19,12 @@ dotnet user-secrets set "JWT:secret" "your-32-characters-long-super-strong-jwt-s
 ```bash
 dotnet ef migrations add init
 dotnet ef database update
+```
+
+## Установка UserService
+```bash
+dotnet ef migrations add init --context UserDataContext
+dotnet ef database update --context UserDataContext
 ```
 
 ## **Описание API эндпоинтов:**

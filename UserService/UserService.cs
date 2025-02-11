@@ -4,8 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using UserService.Models;
 
-// добавить аутентификацию во всем микросервисы
-
 namespace UserService
 {
     public class UserService
@@ -13,6 +11,10 @@ namespace UserService
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            // Register AppDbContext
+            builder.Services.AddDbContext<UserDataContext>(options =>
+                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             // Настройка аутентификации JWT
             builder.Services.AddAuthentication(options =>
@@ -37,8 +39,14 @@ namespace UserService
             builder.Services.AddAuthorization();
             builder.Services.AddControllers();
 
-
             var app = builder.Build();
+
+            // Применение миграций
+            using (var scope = app.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<UserDataContext>();
+                context.Database.Migrate();
+            }
 
             app.UseAuthentication();
             app.UseAuthorization();
