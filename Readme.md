@@ -133,6 +133,8 @@ GET /api/user
 
 - Возвращает сообщение с данными пользователя.
 
+Ответ:
+
 `{
   "Message": "User Data",
   "User": "user@example.com"
