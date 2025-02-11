@@ -51,9 +51,9 @@ POST /api/auth/signup
 
 ```json
 {
+  "Name": "User Name",
   "Email": "user@example.com",
-  "Password": "YourPassword123!",
-  "Name": "User Name"
+  "Password": "YourPassword123!"
 }
 ```
 
