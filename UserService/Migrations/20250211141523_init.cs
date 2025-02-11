@@ -24,8 +24,7 @@ namespace UserService.Migrations
                     Publisher = table.Column<string>(type: "text", nullable: false),
                     ISBN = table.Column<string>(type: "text", nullable: false),
                     Pages = table.Column<int>(type: "integer", nullable: false),
-                    Language = table.Column<string>(type: "text", nullable: false),
-                    CoverImageBase64 = table.Column<byte[]>(type: "bytea", nullable: false)
+                    Language = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {

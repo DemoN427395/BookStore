@@ -11,7 +11,7 @@ using UserService.Models;
 namespace UserService.Migrations
 {
     [DbContext(typeof(UserDataContext))]
-    [Migration("20250211125058_init")]
+    [Migration("20250211141523_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -35,10 +35,6 @@ namespace UserService.Migrations
                     b.Property<string>("Author")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<byte[]>("CoverImageBase64")
-                        .IsRequired()
-                        .HasColumnType("bytea");
 
                     b.Property<string>("Genre")
                         .IsRequired()

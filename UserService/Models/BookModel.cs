@@ -33,5 +33,5 @@ public class BookModel
     [Required]
     public string Language { get; set; } = string.Empty;
 
-    public byte[] CoverImageBase64 { get; set; }
+    // public byte[] CoverImageBase64 { get; set; }
 }

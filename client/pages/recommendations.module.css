@@ -1,0 +1,22 @@
+/* recommendations.module.css */
+.container {
+    padding: 20px;
+  }
+  
+  .title {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .bookList {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+  }
+  
+  .bookItem {
+    width: 150px;
+    text-align: center;
+  }
+  

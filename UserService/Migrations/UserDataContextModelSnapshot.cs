@@ -33,10 +33,6 @@ namespace UserService.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<byte[]>("CoverImageBase64")
-                        .IsRequired()
-                        .HasColumnType("bytea");
-
                     b.Property<string>("Genre")
                         .IsRequired()
                         .HasColumnType("text");

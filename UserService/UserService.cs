@@ -10,50 +10,70 @@ namespace UserService
     {
         public static void Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
+            try {
+                var builder = WebApplication.CreateBuilder(args);
 
-            // Register AppDbContext
-            builder.Services.AddDbContext<UserDataContext>(options =>
-                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-            // Настройка аутентификации JWT
-            builder.Services.AddAuthentication(options =>
+                // Добавление политики CORS, разрешающей все источники
+                builder.Services.AddCors(options =>
                 {
-                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-                })
-                .AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = new TokenValidationParameters
+                    options.AddPolicy("AllowAll", policy =>
                     {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidAudience = builder.Configuration["JWT:ValidAudience"],
-                        ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
-                        IssuerSigningKey = new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(builder.Configuration["JWT:secret"]))
-                    };
+                        policy.AllowAnyOrigin()
+                            .AllowAnyHeader()
+                            .AllowAnyMethod();
+                    });
                 });
 
-            builder.Services.AddAuthorization();
-            builder.Services.AddControllers();
+                // Register AppDbContext
+                builder.Services.AddDbContext<UserDataContext>(options =>
+                    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            var app = builder.Build();
+                // Настройка аутентификации JWT
+                builder.Services.AddAuthentication(options =>
+                    {
+                        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                    })
+                    .AddJwtBearer(options =>
+                    {
+                        options.TokenValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuer = true,
+                            ValidateAudience = true,
+                            ValidAudience = builder.Configuration["JWT:ValidAudience"],
+                            ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
+                            IssuerSigningKey = new SymmetricSecurityKey(
+                                Encoding.UTF8.GetBytes(builder.Configuration["JWT:secret"]))
+                        };
+                    });
 
-            // Применение миграций
-            using (var scope = app.Services.CreateScope())
-            {
-                var context = scope.ServiceProvider.GetRequiredService<UserDataContext>();
-                context.Database.Migrate();
+                builder.Services.AddAuthorization();
+                builder.Services.AddControllers();
+
+                var app = builder.Build();
+
+                // Применение миграций
+                using (var scope = app.Services.CreateScope())
+                {
+                    var context = scope.ServiceProvider.GetRequiredService<UserDataContext>();
+                    context.Database.Migrate();
+                }
+
+                app.UseCors("AllowAll");
+
+                app.UseAuthentication();
+                app.UseAuthorization();
+
+                app.MapControllers();
+
+                app.Run();
             }
-
-            app.UseAuthentication();
-            app.UseAuthorization();
-
-            app.MapControllers();
-
-            app.Run();
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.ReadKey();
+            }
         }
     }
 }

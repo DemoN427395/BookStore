@@ -10,17 +10,36 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
 		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Ubuntu|Any CPU = Ubuntu|Any CPU
+		Ubuntu|x64 = Ubuntu|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{DF53D68E-A5E9-415E-9D7B-73EB0C713C45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DF53D68E-A5E9-415E-9D7B-73EB0C713C45}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF53D68E-A5E9-415E-9D7B-73EB0C713C45}.Debug|x64.ActiveCfg = linux (Ubuntu)|x64
+		{DF53D68E-A5E9-415E-9D7B-73EB0C713C45}.Debug|x64.Build.0 = linux (Ubuntu)|x64
 		{DF53D68E-A5E9-415E-9D7B-73EB0C713C45}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DF53D68E-A5E9-415E-9D7B-73EB0C713C45}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF53D68E-A5E9-415E-9D7B-73EB0C713C45}.Release|x64.ActiveCfg = Release|x64
+		{DF53D68E-A5E9-415E-9D7B-73EB0C713C45}.Release|x64.Build.0 = Release|x64
+		{DF53D68E-A5E9-415E-9D7B-73EB0C713C45}.Ubuntu|Any CPU.ActiveCfg = linux (Ubuntu)|Any CPU
+		{DF53D68E-A5E9-415E-9D7B-73EB0C713C45}.Ubuntu|Any CPU.Build.0 = linux (Ubuntu)|Any CPU
+		{DF53D68E-A5E9-415E-9D7B-73EB0C713C45}.Ubuntu|x64.ActiveCfg = Debug|x64
+		{DF53D68E-A5E9-415E-9D7B-73EB0C713C45}.Ubuntu|x64.Build.0 = Debug|x64
 		{1E24D778-1B25-4C6E-9DEE-36882021A3DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1E24D778-1B25-4C6E-9DEE-36882021A3DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E24D778-1B25-4C6E-9DEE-36882021A3DB}.Debug|x64.ActiveCfg = Debug|x64
+		{1E24D778-1B25-4C6E-9DEE-36882021A3DB}.Debug|x64.Build.0 = Debug|x64
 		{1E24D778-1B25-4C6E-9DEE-36882021A3DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1E24D778-1B25-4C6E-9DEE-36882021A3DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E24D778-1B25-4C6E-9DEE-36882021A3DB}.Release|x64.ActiveCfg = Release|x64
+		{1E24D778-1B25-4C6E-9DEE-36882021A3DB}.Release|x64.Build.0 = Release|x64
+		{1E24D778-1B25-4C6E-9DEE-36882021A3DB}.Ubuntu|Any CPU.ActiveCfg = Ubuntu|Any CPU
+		{1E24D778-1B25-4C6E-9DEE-36882021A3DB}.Ubuntu|Any CPU.Build.0 = Ubuntu|Any CPU
+		{1E24D778-1B25-4C6E-9DEE-36882021A3DB}.Ubuntu|x64.ActiveCfg = Debug|x64
+		{1E24D778-1B25-4C6E-9DEE-36882021A3DB}.Ubuntu|x64.Build.0 = Debug|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
