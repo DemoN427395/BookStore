@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using UserService.Models;
 
 namespace UserService.Controllers;
 
@@ -8,22 +11,35 @@ namespace UserService.Controllers;
 [Authorize]
 public class UserController : ControllerBase
 {
-    // Доступ разрешен только для аутентифицированных пользователей
-    [HttpGet]
-    // [Authorize]
-    public IActionResult GetUserData()
+    private readonly UserDataContext _context;
+    private readonly UserManager<ApplicationUser> _userManager;
+
+    public UserController(UserManager<ApplicationUser> userManager, UserDataContext context)
     {
-        // Доступ к информации о пользователе через HttpContext.User
-        var userName = User.Identity?.Name;
-        return Ok(new { Message = "User Data", User = userName });
+        _userManager = userManager;
+        _context = context;
     }
 
-    [HttpGet("test")]
-    public IActionResult TestUserData()
+    [HttpGet("me")]
+    public async Task<IActionResult> GetCurrentUserId()
     {
-        return Ok(new
+        try
         {
-            Message = "Test"
-        });
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized(new { message = "User ID not found in claims." });
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+                return NotFound(new { message = "User not found." });
+
+            return Ok(new { Id = user.Id });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
     }
 }

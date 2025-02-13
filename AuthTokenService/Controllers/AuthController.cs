@@ -59,6 +59,7 @@ public class AuthController : ControllerBase
 
             ApplicationUser user = new()
             {
+
                 Email = model.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.Email,
@@ -111,6 +112,7 @@ public class AuthController : ControllerBase
 
             List<Claim> authClaims = [
                 new (ClaimTypes.Name, user.UserName),
+                new (ClaimTypes.NameIdentifier, user.Id),
                 new (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         ];
 

@@ -33,5 +33,7 @@ public class BookModel
     [Required]
     public string Language { get; set; } = string.Empty;
 
-    // public byte[] CoverImageBase64 { get; set; }
+    // Ссылка на идентификатор пользователя из микросервиса аутентификации
+    [Required]
+    public string UserId { get; set; } = string.Empty;
 }

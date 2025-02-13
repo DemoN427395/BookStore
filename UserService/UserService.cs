@@ -2,7 +2,9 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using UserService.Constants;
 using UserService.Models;
+using UserService.Services;
 
 namespace UserService
 {
@@ -24,7 +26,11 @@ namespace UserService
                     });
                 });
 
-                // Register AppDbContext
+                builder.Services.AddHttpClient<AuthServiceClient>(client =>
+                {
+                    client.BaseAddress = new Uri(AuthUri.HttpUri);
+                });
+
                 builder.Services.AddDbContext<UserDataContext>(options =>
                     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 

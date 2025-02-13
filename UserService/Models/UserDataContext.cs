@@ -1,14 +1,15 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using UserService.DTOs;
 
-namespace UserService.Models
+namespace UserService.Models;
+
+public class UserDataContext : IdentityDbContext<ApplicationUser>
 {
-    public class UserDataContext : DbContext
+    public UserDataContext(DbContextOptions<UserDataContext> options)
+        : base(options)
     {
-        public UserDataContext(DbContextOptions<UserDataContext> options)
-            : base(options)
-        {
-        }
-
-        public DbSet<BookModel> Books { get; set; }
     }
+
+    public DbSet<BookModel> Books { get; set; }
 }
