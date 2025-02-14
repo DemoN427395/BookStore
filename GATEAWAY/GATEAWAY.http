@@ -1,0 +1,6 @@
+@GATEAWAY_HostAddress = http://localhost:5005
+
+GET {{GATEAWAY_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

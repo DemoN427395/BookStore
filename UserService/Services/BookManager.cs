@@ -1,8 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using UserService.Models;
-using UserService.Services;
 
-namespace UserService.Manager;
+namespace UserService.Services;
 
 public class BookManager
 {

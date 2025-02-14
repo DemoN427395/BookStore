@@ -33,7 +33,7 @@ public class UsersController : ControllerBase
 
 
     [HttpGet("me")]
-    // [Authorize]
+    [Authorize]
     public async Task<IActionResult> GetCurrentUserId()
     {
         try
@@ -65,5 +65,11 @@ public class UsersController : ControllerBase
         {
             return StatusCode(StatusCodes.Status500InternalServerError, new { message = ex.Message });
         }
+    }
+
+    [HttpGet("test")]
+    public async Task<IActionResult> TestMethod()
+    {
+        return Ok("Test method");
     }
 }

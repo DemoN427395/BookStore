@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Data\" />
+    <ProjectReference Include="..\BookStoreLib\BookStoreLib.csproj" />
   </ItemGroup>
 
 </Project>

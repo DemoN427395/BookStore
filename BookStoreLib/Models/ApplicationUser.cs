@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace AuthTokenService.Models;
+namespace BookStoreLib.Models;
 
 public class ApplicationUser : IdentityUser
 { 

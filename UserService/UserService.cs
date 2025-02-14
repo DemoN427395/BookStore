@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using UserService.Constants;
 using UserService.Models;
-using UserService.Services;
 
 namespace UserService
 {
