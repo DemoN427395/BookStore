@@ -1,9 +1,9 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
-using AuthTokenService.Interfaces;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Cryptography;
+using BookStoreLib.Interfaces;
 
 namespace AuthTokenService.Services;
 

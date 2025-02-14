@@ -1,40 +1,34 @@
-﻿using Microsoft.EntityFrameworkCore;
-using UserService.Models;
+﻿// Services/BookManager.cs
+using Microsoft.EntityFrameworkCore;
+using BookStoreLib.Models;
 
-namespace UserService.Services;
-
-public class BookManager
+namespace UserService.Services
 {
-    private readonly UserDataContext _dbContext;
-    private readonly AuthServiceClient _authServiceClient;
-
-    public BookManager(UserDataContext dbContext, AuthServiceClient authServiceClient)
+    public class BookManager
     {
-        _dbContext = dbContext;
-        _authServiceClient = authServiceClient;
-    }
+        private readonly UserDbContext _dbContext;
+        private readonly AuthServiceClient _authServiceClient;
 
-    public async Task ProcessBookAsync(int bookId)
-    {
-        // Получаем книгу из базы данных
-        var book = await _dbContext.Books.FirstOrDefaultAsync(b => b.Id == bookId);
-        if (book == null)
+        // Добавляем AuthServiceClient в конструктор
+        public BookManager(
+            UserDbContext dbContext,
+            AuthServiceClient authServiceClient)
         {
-            // Обработка ошибки: книга не найдена
-            return;
+            _dbContext = dbContext;
+            _authServiceClient = authServiceClient;
         }
 
-        // Вызываем Auth-сервис для получения данных о пользователе
-        var user = await _authServiceClient.GetUserByIdAsync();
-        if (user != null)
+        public async Task ProcessBookAsync(int bookId)
         {
-            // Дальнейшая обработка: например, логирование или отправка уведомления
-            Console.WriteLine($"Книга '{book.Title}' принадлежит пользователю {user.Name}");
-        }
-        else
-        {
-            // Обработка ситуации, когда пользователь не найден в Auth-сервисе
-            Console.WriteLine("Пользователь не найден");
+            var book = await _dbContext.Books
+                .FirstOrDefaultAsync(b => b.Id == bookId);
+
+            if (book == null) return;
+
+            var user = await _authServiceClient.GetUserByIdAsync(book.UserId);
+            Console.WriteLine(user != null
+                ? $"Книга '{book.Title}' принадлежит {user.Name}"
+                : "Пользователь не найден");
         }
     }
 }

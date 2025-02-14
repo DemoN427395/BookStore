@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
-using AuthTokenService.Interfaces;
-using AuthTokenService.Models;
+using BookStoreLib.Data;
+using BookStoreLib.Interfaces;
+using BookStoreLib.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -16,13 +17,13 @@ public class UsersController : ControllerBase
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly ILogger<AuthController> _logger;
     private readonly ITokenService _tokenService;
-    private readonly AppDbContext _context;
+    private readonly AuthDbContext _context;
 
 
     public UsersController(UserManager<ApplicationUser> userManager,
         RoleManager<IdentityRole> roleManager,
         ILogger<AuthController> logger,
-        ITokenService tokenService, AppDbContext context)
+        ITokenService tokenService, AuthDbContext context)
     {
         _userManager = userManager;
         _roleManager = roleManager;

@@ -1,4 +1,4 @@
-﻿using AuthTokenService.Models;
+﻿using BookStoreLib.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuthTokenService.Services;
@@ -13,7 +13,7 @@ public class MigrationHostedService : IHostedService
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         using var scope = _serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var context = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
         await context.Database.MigrateAsync(cancellationToken);
     }
     public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;

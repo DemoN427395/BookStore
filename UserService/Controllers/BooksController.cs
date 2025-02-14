@@ -1,17 +1,19 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿// Controllers/BooksController.cs
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
-using UserService.Models;
+using BookStoreLib.Models;
 using System.Security.Claims;
 
 namespace UserService.Controllers;
-    [ApiController]
-    [Route("api/[controller]")]
+
+[ApiController]
+[Route("api/[controller]")]
 public class BooksController : ControllerBase
 {
-    private readonly UserDataContext _context;
+    private readonly UserDbContext _context;
 
-    public BooksController(UserDataContext context)
+    public BooksController(UserDbContext context)
     {
         _context = context;
     }
@@ -20,70 +22,51 @@ public class BooksController : ControllerBase
     // [Authorize]
     // public async Task<IActionResult> CreateBook(BookModel book)
     // {
-    //     try
-    //     {
-    //         bool bookExists = await _context.Books
-    //             .AnyAsync(b => b.Title == book.Title);
+    //     var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    //     if (string.IsNullOrEmpty(userId)) return Unauthorized();
     //
-    //         if (bookExists)
-    //         {
-    //             return BadRequest("Book already exists");
-    //         }
+    //     book.UserId = userId;
     //
-    //         BookModel newBook = new()
-    //         {
-    //             Title = book.Title,
-    //             Author = book.Author,
-    //             Genre = book.Genre,
-    //             Year = book.Year,
-    //             Publisher = book.Publisher,
-    //             ISBN = book.ISBN,
-    //             Pages = book.Pages,
-    //             Language = book.Language
-    //             // CoverImage = !string.IsNullOrEmpty(book.CoverImageBase64)
-    //             //     ? Convert.FromBase64String(book.CoverImageBase64)
-    //             //     : null
-    //         };
+    //     if (await _context.Books.AnyAsync(b => b.Title == book.Title && b.UserId == userId))
+    //         return BadRequest("Book exists");
     //
-    //         _context.Books.Add(newBook);
-    //         await _context.SaveChangesAsync();
-    //         return Ok($"Successfully Added with Id {newBook.Id}");
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         return BadRequest("An error occurred while adding the book.");
-    //     }
+    //     _context.Books.Add(book);
+    //     await _context.SaveChangesAsync();
+    //     return Ok($"Book created: {book.Id}");
     // }
 
-    // UserService/Controllers/BooksController.cs
     [HttpPost("create")]
     [Authorize]
     public async Task<IActionResult> CreateBook(BookModel book)
     {
         try
         {
-            // Извлекаем UserId из токена
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized("User ID not found in token.");
-            }
-
-            // Привязываем книгу к пользователю
-            book.UserId = userId;
-
-            // Проверка на дубликат (для текущего пользователя)
             bool bookExists = await _context.Books
-                .AnyAsync(b => b.Title == book.Title && b.UserId == userId);
-
+                .AnyAsync(b => b.Title == book.Title);
+    
             if (bookExists)
             {
                 return BadRequest("Book already exists");
             }
-
-            _context.Books.Add(book);
+    
+            BookModel newBook = new()
+            {
+                Title = book.Title,
+                Author = book.Author,
+                Genre = book.Genre,
+                Year = book.Year,
+                Publisher = book.Publisher,
+                ISBN = book.ISBN,
+                Pages = book.Pages,
+                Language = book.Language
+                // CoverImage = !string.IsNullOrEmpty(book.CoverImageBase64)
+                //     ? Convert.FromBase64String(book.CoverImageBase64)
+                //     : null
+            };
+    
+            _context.Books.Add(newBook);
             await _context.SaveChangesAsync();
-            return Ok($"Successfully Added with Id {book.Id}");
+            return Ok($"Successfully Added with Id {newBook.Id}");
         }
         catch (Exception ex)
         {
@@ -91,19 +74,15 @@ public class BooksController : ControllerBase
         }
     }
 
+
     [HttpGet]
-    public async Task<IActionResult> GetAllRandomBooks()
+    public async Task<IActionResult> GetRandomBooks()
     {
-        try
-        {
-            return Ok(await _context.Books
-                .OrderBy(b => Guid.NewGuid())
-                .Take(5)
-                .ToListAsync());
-        }
-        catch (Exception ex)
-        {
-            return BadRequest("An error occurred while fetching the books.");
-        }
+        var books = await _context.Books
+            .OrderBy(b => Guid.NewGuid())
+            .Take(5)
+            .ToListAsync();
+
+        return Ok(books);
     }
 }

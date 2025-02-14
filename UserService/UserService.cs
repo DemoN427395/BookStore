@@ -2,8 +2,11 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using BookStoreLib.Models;
+using BookStoreLib.Data;
 using UserService.Constants;
-using UserService.Models;
+using UserService.Services;
+using Microsoft.AspNetCore.Identity;
 
 namespace UserService
 {
@@ -11,10 +14,11 @@ namespace UserService
     {
         public static void Main(string[] args)
         {
-            try {
+            try
+            {
                 var builder = WebApplication.CreateBuilder(args);
 
-                // Добавление политики CORS, разрешающей все источники
+                // Добавление политики CORS
                 builder.Services.AddCors(options =>
                 {
                     options.AddPolicy("AllowAll", policy =>
@@ -29,17 +33,33 @@ namespace UserService
                 {
                     client.BaseAddress = new Uri(AuthUri.HttpUri);
                 });
+                string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-                builder.Services.AddDbContext<UserDataContext>(options =>
-                    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+                // // Используем UserDbContext из библиотеки
+                // builder.Services.AddDbContext<UserDbContext>(options =>
+                //     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+                builder.Services.AddDbContext<AuthDbContext>(options =>
+                    options.UseNpgsql(connectionString, b =>
+                    {
+                        b.MigrationsAssembly("AuthService");
+                        b.MigrationsHistoryTable("__AuthMigrationsHistory", "auth"); // История миграций в схеме auth
+                    }));
+
+                // UserDbContext
+                builder.Services.AddDbContext<UserDbContext>(options =>
+                    options.UseNpgsql(connectionString, b =>
+                    {
+                        b.MigrationsAssembly("UserService");
+                        b.MigrationsHistoryTable("__UserMigrationsHistory", "user"); // История миграций в схеме user
+                    }));
                 // Настройка аутентификации JWT
                 builder.Services.AddAuthentication(options =>
-                    {
-                        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-                    })
+                {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
                     .AddJwtBearer(options =>
                     {
                         options.TokenValidationParameters = new TokenValidationParameters
@@ -55,26 +75,24 @@ namespace UserService
 
                 builder.Services.AddAuthorization();
                 builder.Services.AddControllers();
+                builder.Services.AddScoped<BookManager>();
 
                 var app = builder.Build();
 
                 // Применение миграций
                 using (var scope = app.Services.CreateScope())
                 {
-                    var context = scope.ServiceProvider.GetRequiredService<UserDataContext>();
+                    var context = scope.ServiceProvider.GetRequiredService<UserDbContext>();
                     context.Database.Migrate();
                 }
 
                 app.UseCors("AllowAll");
-
                 app.UseAuthentication();
                 app.UseAuthorization();
-
                 app.MapControllers();
-
                 app.Run();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 Console.ReadKey();

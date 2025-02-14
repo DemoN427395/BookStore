@@ -1,11 +1,13 @@
 using System.Text;
-using AuthTokenService.Interfaces;
-using AuthTokenService.Models;
 using AuthTokenService.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+
+using BookStoreLib.Data;
+using BookStoreLib.Interfaces;
+using BookStoreLib.Models;
 
 namespace AuthTokenService
 {
@@ -29,15 +31,21 @@ namespace AuthTokenService
                     });
                 });
 
-                string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+                // string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
                 builder.Services.AddHostedService<MigrationHostedService>();
 
-                builder.Services.AddDbContext<AppDbContext>(options =>
-                    options.UseNpgsql(connectionString));
+                // builder.Services.AddDbContext<AuthDbContext>(options =>
+                //     options.UseNpgsql(connectionString));
+                builder.Services.AddDbContext<AuthDbContext>(options =>
+                    options.UseNpgsql(
+                        builder.Configuration.GetConnectionString("DefaultConnection"),
+                        b => b.MigrationsAssembly("AuthTokenService")
+                    )
+                );
 
                 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-                    .AddEntityFrameworkStores<AppDbContext>()
+                    .AddEntityFrameworkStores<AuthDbContext>()
                     .AddDefaultTokenProviders();
 
                 builder.Services.AddAuthentication(options =>
@@ -74,7 +82,7 @@ namespace AuthTokenService
                 // Применение миграций
                 using (var scope = app.Services.CreateScope())
                 {
-                    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                    var context = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
                     context.Database.Migrate();
                 }
 

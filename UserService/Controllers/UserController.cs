@@ -1,8 +1,10 @@
-﻿using System.Security.Claims;
+﻿// Controllers/UserController.cs
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using UserService.Models;
+using System.Security.Claims;
+using BookStoreLib.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace UserService.Controllers;
 
@@ -11,35 +13,59 @@ namespace UserService.Controllers;
 [Authorize]
 public class UserController : ControllerBase
 {
-    private readonly UserDataContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly UserDbContext _context;
 
-    public UserController(UserManager<ApplicationUser> userManager, UserDataContext context)
+    public UserController(UserManager<ApplicationUser> userManager, UserDbContext context)
     {
         _userManager = userManager;
         _context = context;
     }
 
     [HttpGet("me")]
-    public async Task<IActionResult> GetCurrentUserId()
+    public async Task<IActionResult> GetCurrentUser()
     {
-        try
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized(new { message = "User ID not found in claims." });
-
-            var user = await _userManager.FindByIdAsync(userId);
-
-            if (user == null)
-                return NotFound(new { message = "User not found." });
-
-            return Ok(new { Id = user.Id });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { message = ex.Message });
-        }
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId)) return Unauthorized();
+    
+        var user = await _userManager.FindByIdAsync(userId);
+        return user == null
+            ? NotFound()
+            : Ok(new { user.Id, user.Email, user.Name });
     }
+    //
+    // [HttpGet("me")]
+    // public async Task<IActionResult> GetCurrentUserId()
+    // {
+    //     try
+    //     {
+    //         // Получаем ID пользователя из Claims
+    //         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    //
+    //         if (string.IsNullOrEmpty(userId))
+    //         {
+    //             return Unauthorized(new { message = "User ID not found in claims." });
+    //         }
+    //
+    //         // Ищем пользователя в базе данных
+    //         var user = await _context.Users.FindAsync(userId);
+    //
+    //         if (user == null)
+    //         {
+    //             return NotFound(new { message = "User not found." });
+    //         }
+    //
+    //         return Ok(new
+    //         {
+    //             Id = user.Id,
+    //             Email = user.Email,
+    //             Name = user.Name
+    //         });
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         return StatusCode(StatusCodes.Status500InternalServerError, new { message = ex.Message });
+    //     }
+    // }
+
 }
