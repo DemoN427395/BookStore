@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using BookStoreLib.Models;
 using System.Security.Claims;
+using BookStoreLib.Data;
+using BookStoreLib.DTOs;
 
 namespace UserService.Controllers;
 
@@ -18,71 +20,58 @@ public class BooksController : ControllerBase
         _context = context;
     }
 
-    // [HttpPost("create")]
-    // [Authorize]
-    // public async Task<IActionResult> CreateBook(BookModel book)
-    // {
-    //     var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-    //     if (string.IsNullOrEmpty(userId)) return Unauthorized();
-    //
-    //     book.UserId = userId;
-    //
-    //     if (await _context.Books.AnyAsync(b => b.Title == book.Title && b.UserId == userId))
-    //         return BadRequest("Book exists");
-    //
-    //     _context.Books.Add(book);
-    //     await _context.SaveChangesAsync();
-    //     return Ok($"Book created: {book.Id}");
-    // }
-
     [HttpPost("create")]
     [Authorize]
-    public async Task<IActionResult> CreateBook(BookModel book)
+    public async Task<IActionResult> CreateBook([FromBody] CreateBookDTO dto)
     {
-        try
-        {
-            bool bookExists = await _context.Books
-                .AnyAsync(b => b.Title == book.Title);
-    
-            if (bookExists)
-            {
-                return BadRequest("Book already exists");
-            }
-    
-            BookModel newBook = new()
-            {
-                Title = book.Title,
-                Author = book.Author,
-                Genre = book.Genre,
-                Year = book.Year,
-                Publisher = book.Publisher,
-                ISBN = book.ISBN,
-                Pages = book.Pages,
-                Language = book.Language
-                // CoverImage = !string.IsNullOrEmpty(book.CoverImageBase64)
-                //     ? Convert.FromBase64String(book.CoverImageBase64)
-                //     : null
-            };
-    
-            _context.Books.Add(newBook);
-            await _context.SaveChangesAsync();
-            return Ok($"Successfully Added with Id {newBook.Id}");
-        }
-        catch (Exception ex)
-        {
-            return BadRequest("An error occurred while adding the book.");
-        }
-    }
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
+        // Проверка существования пользователя (только чтение)
+        var userExists = await _context.AspNetUsers
+            .AnyAsync(u => u.Id == userId);
+
+        if (!userExists)
+            return BadRequest("User does not exist.");
+
+        if (await _context.Books.AnyAsync(b => b.Title == dto.Title))
+            return BadRequest("Book with this name exist");
+
+        if (await _context.Books.AnyAsync(b => b.ISBN == dto.ISBN))
+            return BadRequest("Book with this ISBN exist");
+
+        var newBook = new BookModel
+        {
+            Title = dto.Title,
+            Author = dto.Author,
+            Genre = dto.Genre,
+            Year = dto.Year,
+            Publisher = dto.Publisher,
+            ISBN = dto.ISBN,
+            Pages = dto.Pages,
+            Language = dto.Language,
+            UserId = userId
+        };
+
+        _context.Books.Add(newBook);
+        await _context.SaveChangesAsync();
+        return Ok(newBook.Id);
+    }
 
     [HttpGet]
     public async Task<IActionResult> GetRandomBooks()
     {
-        var books = await _context.Books
-            .OrderBy(b => Guid.NewGuid())
-            .Take(5)
-            .ToListAsync();
+        try
+        {
+            var books = await _context.Books
+                .OrderBy(b => Guid.NewGuid())
+                .Take(5)
+                .ToListAsync();
 
-        return Ok(books);
+            return Ok(books);
+        }
+        catch (Exception ex)
+        {
+            return (BadRequest(ex));
+        }
     }
 }

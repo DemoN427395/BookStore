@@ -21,28 +21,48 @@ namespace AuthTokenService
                 builder.Services.AddControllers();
 
                 // Добавление политики CORS, разрешающей все источники
+                // builder.Services.AddCors(options =>
+                // {
+                //     options.AddPolicy("AllowAll", policy =>
+                //     {
+                //         policy.AllowAnyOrigin()
+                //             .AllowAnyHeader()
+                //             .AllowAnyMethod();
+                //     });
+                // });
+
                 builder.Services.AddCors(options =>
                 {
                     options.AddPolicy("AllowAll", policy =>
                     {
-                        policy.AllowAnyOrigin()
+                        policy.WithOrigins("http://localhost:5001", "http://localhost:4000") // URL UserService & GATEAWAY
                             .AllowAnyHeader()
-                            .AllowAnyMethod();
+                            .AllowAnyMethod()
+                            .AllowCredentials();
                     });
                 });
 
-                // string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+                string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
                 builder.Services.AddHostedService<MigrationHostedService>();
 
                 // builder.Services.AddDbContext<AuthDbContext>(options =>
                 //     options.UseNpgsql(connectionString));
+
+                // builder.Services.AddDbContext<AuthDbContext>(options =>
+                //     options.UseNpgsql(
+                //         builder.Configuration.GetConnectionString("DefaultConnection"),
+                //         b => b.MigrationsAssembly("BookStoreLib") // Контекст находится в библиотеке
+                //     )
+                // );
+
+
                 builder.Services.AddDbContext<AuthDbContext>(options =>
-                    options.UseNpgsql(
-                        builder.Configuration.GetConnectionString("DefaultConnection"),
-                        b => b.MigrationsAssembly("AuthTokenService")
-                    )
-                );
+                    options.UseNpgsql(connectionString, b =>
+                    {
+                        b.MigrationsAssembly("BookStoreLib");
+                    }));
+
 
                 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
                     .AddEntityFrameworkStores<AuthDbContext>()

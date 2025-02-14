@@ -31,7 +31,13 @@ namespace UserService
 
                 builder.Services.AddHttpClient<AuthServiceClient>(client =>
                 {
-                    client.BaseAddress = new Uri(AuthUri.HttpUri);
+                    client.BaseAddress = new Uri("https://localhost:5000"); // URL AuthTokenService
+                });
+
+
+                builder.Services.AddHttpClient("AuthTokenService", client =>
+                {
+                    client.BaseAddress = new Uri("https://localhost:5000"); // URL AuthTokenService
                 });
                 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -39,20 +45,15 @@ namespace UserService
                 // builder.Services.AddDbContext<UserDbContext>(options =>
                 //     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-                builder.Services.AddDbContext<AuthDbContext>(options =>
-                    options.UseNpgsql(connectionString, b =>
-                    {
-                        b.MigrationsAssembly("AuthService");
-                        b.MigrationsHistoryTable("__AuthMigrationsHistory", "auth"); // История миграций в схеме auth
-                    }));
-
                 // UserDbContext
                 builder.Services.AddDbContext<UserDbContext>(options =>
                     options.UseNpgsql(connectionString, b =>
                     {
-                        b.MigrationsAssembly("UserService");
+                        b.MigrationsAssembly("BookStoreLib");
                         b.MigrationsHistoryTable("__UserMigrationsHistory", "user"); // История миграций в схеме user
                     }));
+
+
                 // Настройка аутентификации JWT
                 builder.Services.AddAuthentication(options =>
                 {
@@ -76,6 +77,8 @@ namespace UserService
                 builder.Services.AddAuthorization();
                 builder.Services.AddControllers();
                 builder.Services.AddScoped<BookManager>();
+                builder.Services.AddScoped<AuthServiceClient>();
+                builder.Services.AddHttpContextAccessor();
 
                 var app = builder.Build();
 

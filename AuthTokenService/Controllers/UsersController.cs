@@ -68,6 +68,20 @@ public class UsersController : ControllerBase
         }
     }
 
+    [HttpGet("me-test")]
+    public async Task<IActionResult> GetCurrentUser()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var user = await _userManager.FindByIdAsync(userId);
+        return Ok(new
+        {
+            user.Id,
+            user.Email,
+            user.UserName
+        });
+    }
+
+
     [HttpGet("test")]
     public async Task<IActionResult> TestMethod()
     {

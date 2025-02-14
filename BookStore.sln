@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthTokenService", "AuthTok
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookStoreLib", "BookStoreLib\BookStoreLib.csproj", "{50DB498F-56D0-4AF1-B0A4-705796CB155F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GATEAWAY", "GATEAWAY\GATEAWAY.csproj", "{EA4559A1-80D8-4723-85D7-746D15EA73FA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GATEWAY", "GATEWAY\GATEWAY.csproj", "{EA4559A1-80D8-4723-85D7-746D15EA73FA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

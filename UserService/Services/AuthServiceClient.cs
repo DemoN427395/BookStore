@@ -1,6 +1,7 @@
 ﻿// Services/AuthServiceClient.cs
-using System.Net.Http.Json;
 using BookStoreLib.Models;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
 
 namespace UserService.Services
 {
@@ -13,12 +14,14 @@ namespace UserService.Services
             _httpClient = httpClient;
         }
 
-        public async Task<ApplicationUser?> GetUserByIdAsync(string userId)
+        public async Task<ApplicationUser?> GetCurrentUserAsync(string accessToken)
         {
             try
             {
-                return await _httpClient.GetFromJsonAsync<ApplicationUser>(
-                    $"/api/users/{userId}");
+                _httpClient.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", accessToken);
+
+                return await _httpClient.GetFromJsonAsync<ApplicationUser>("/api/users/me");
             }
             catch
             {

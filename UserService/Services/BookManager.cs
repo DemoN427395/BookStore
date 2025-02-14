@@ -1,6 +1,9 @@
 ﻿// Services/BookManager.cs
 using Microsoft.EntityFrameworkCore;
 using BookStoreLib.Models;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
+using BookStoreLib.Data;
 
 namespace UserService.Services
 {
@@ -8,14 +11,16 @@ namespace UserService.Services
     {
         private readonly UserDbContext _dbContext;
         private readonly AuthServiceClient _authServiceClient;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        // Добавляем AuthServiceClient в конструктор
         public BookManager(
             UserDbContext dbContext,
-            AuthServiceClient authServiceClient)
+            AuthServiceClient authServiceClient,
+            IHttpContextAccessor httpContextAccessor)
         {
             _dbContext = dbContext;
             _authServiceClient = authServiceClient;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task ProcessBookAsync(int bookId)
@@ -25,9 +30,18 @@ namespace UserService.Services
 
             if (book == null) return;
 
-            var user = await _authServiceClient.GetUserByIdAsync(book.UserId);
+            var accessToken = _httpContextAccessor.HttpContext?.Request.Headers["Authorization"]
+                .ToString().Replace("Bearer ", "");
+
+            if (string.IsNullOrEmpty(accessToken))
+            {
+                Console.WriteLine("Access token not found");
+                return;
+            }
+
+            var user = await _authServiceClient.GetCurrentUserAsync(accessToken);
             Console.WriteLine(user != null
-                ? $"Книга '{book.Title}' принадлежит {user.Name}"
+                ? $"Книга '{book.Title}' принадлежит {user.UserName}"
                 : "Пользователь не найден");
         }
     }

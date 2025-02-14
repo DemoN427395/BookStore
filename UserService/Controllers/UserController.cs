@@ -5,6 +5,8 @@ using System.Security.Claims;
 using BookStoreLib.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Http.Headers;
+using UserService.Services;
 
 namespace UserService.Controllers;
 
@@ -13,27 +15,40 @@ namespace UserService.Controllers;
 [Authorize]
 public class UserController : ControllerBase
 {
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly UserDbContext _context;
+    private readonly HttpClient _authServiceClient;
+    private readonly BookManager _bookManager;
 
-    public UserController(UserManager<ApplicationUser> userManager, UserDbContext context)
+    public UserController(IHttpClientFactory httpClientFactory, BookManager bookManager)
     {
-        _userManager = userManager;
-        _context = context;
+        _authServiceClient = httpClientFactory.CreateClient("AuthTokenService");
+        _bookManager = bookManager;
+    }
+
+
+    [HttpGet("process-book/{bookId}")]
+    public async Task<IActionResult> ProcessBook(int bookId)
+    {
+        await _bookManager.ProcessBookAsync(bookId);
+        return Ok();
     }
 
     [HttpGet("me")]
     public async Task<IActionResult> GetCurrentUser()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId)) return Unauthorized();
-    
-        var user = await _userManager.FindByIdAsync(userId);
-        return user == null
-            ? NotFound()
-            : Ok(new { user.Id, user.Email, user.Name });
+        // Пересылаем токен в AuthTokenService
+        var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+        _authServiceClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var response = await _authServiceClient.GetAsync("/api/users/me");
+        if (!response.IsSuccessStatusCode)
+        {
+            return StatusCode((int)response.StatusCode);
+        }
+
+        var userData = await response.Content.ReadFromJsonAsync<UserData>();
+        return Ok(userData);
     }
-    //
+}
     // [HttpGet("me")]
     // public async Task<IActionResult> GetCurrentUserId()
     // {
@@ -67,5 +82,3 @@ public class UserController : ControllerBase
     //         return StatusCode(StatusCodes.Status500InternalServerError, new { message = ex.Message });
     //     }
     // }
-
-}

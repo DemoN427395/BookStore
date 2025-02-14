@@ -2,7 +2,7 @@ using Microsoft.AspNetCore;
 
 namespace GATEAWAY;
 
-public class Gateaway
+public class Gateway
 {
     public static async Task Main(string[] args)
     {
