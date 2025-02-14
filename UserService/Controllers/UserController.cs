@@ -49,36 +49,3 @@ public class UserController : ControllerBase
         return Ok(userData);
     }
 }
-    // [HttpGet("me")]
-    // public async Task<IActionResult> GetCurrentUserId()
-    // {
-    //     try
-    //     {
-    //         // Получаем ID пользователя из Claims
-    //         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-    //
-    //         if (string.IsNullOrEmpty(userId))
-    //         {
-    //             return Unauthorized(new { message = "User ID not found in claims." });
-    //         }
-    //
-    //         // Ищем пользователя в базе данных
-    //         var user = await _context.Users.FindAsync(userId);
-    //
-    //         if (user == null)
-    //         {
-    //             return NotFound(new { message = "User not found." });
-    //         }
-    //
-    //         return Ok(new
-    //         {
-    //             Id = user.Id,
-    //             Email = user.Email,
-    //             Name = user.Name
-    //         });
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         return StatusCode(StatusCodes.Status500InternalServerError, new { message = ex.Message });
-    //     }
-    // }
