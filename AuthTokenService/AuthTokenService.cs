@@ -20,11 +20,12 @@ namespace AuthTokenService
                 var builder = WebApplication.CreateBuilder(args);
                 builder.Services.AddControllers();
 
+                // CORS setup to allow specific origins
                 builder.Services.AddCors(options =>
                 {
                     options.AddPolicy("AllowAll", policy =>
                     {
-                        policy.WithOrigins("http://localhost:5001", "http://localhost:4000") // URL UserService & GATEAWAY
+                        policy.WithOrigins("http://localhost:5001", "http://localhost:4000") // UserService & Gateway URLs
                             .AllowAnyHeader()
                             .AllowAnyMethod()
                             .AllowCredentials();
@@ -33,8 +34,8 @@ namespace AuthTokenService
 
                 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
+                // Add hosted service for migrations
                 builder.Services.AddHostedService<MigrationHostedService>();
-
 
                 builder.Services.AddDbContext<AuthDbContext>(options =>
                     options.UseNpgsql(connectionString, b =>
@@ -42,7 +43,7 @@ namespace AuthTokenService
                         b.MigrationsAssembly("BookStoreLib");
                     }));
 
-
+                // Identity and JWT authentication setup
                 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
                     .AddEntityFrameworkStores<AuthDbContext>()
                     .AddDefaultTokenProviders();
@@ -53,50 +54,52 @@ namespace AuthTokenService
                     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
                 })
-                    .AddJwtBearer(options =>
+                .AddJwtBearer(options =>
+                {
+                    var secret = builder.Configuration["JWT:secret"]
+                                 ?? throw new ArgumentNullException("JWT:secret is not configured");
+
+                    var validAudience = builder.Configuration["JWT:ValidAudience"]
+                                        ?? throw new ArgumentNullException("JWT:ValidAudience is not configured");
+
+                    var validIssuer = builder.Configuration["JWT:ValidIssuer"]
+                                      ?? throw new ArgumentNullException("JWT:ValidIssuer is not configured");
+
+                    options.TokenValidationParameters = new TokenValidationParameters
                     {
-                        var secret = builder.Configuration["JWT:secret"]
-                                     ?? throw new ArgumentNullException("JWT:secret is not configured");
-
-                        var validAudience = builder.Configuration["JWT:ValidAudience"]
-                                            ?? throw new ArgumentNullException("JWT:ValidAudience is not configured");
-
-                        var validIssuer = builder.Configuration["JWT:ValidIssuer"]
-                                          ?? throw new ArgumentNullException("JWT:ValidIssuer is not configured");
-                        options.TokenValidationParameters = new TokenValidationParameters
-                        {
-                            ValidateIssuer = true,
-                            ValidateAudience = true,
-                            ValidAudience = validAudience,
-                            ValidIssuer = validIssuer,
-                            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret))
-                        };
-                    });
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidAudience = validAudience,
+                        ValidIssuer = validIssuer,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret))
+                    };
+                });
 
                 builder.Services.AddAuthorization();
                 builder.Services.AddScoped<ITokenService, TokenService>();
 
                 var app = builder.Build();
 
-                // Применение миграций
+                // Apply migrations on startup
                 using (var scope = app.Services.CreateScope())
                 {
                     var context = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
                     context.Database.Migrate();
                 }
 
-                // Использование CORS middleware с политикой "AllowAll" (до аутентификации и авторизации)
+                // Use CORS middleware with "AllowAll" policy
                 app.UseCors("AllowAll");
 
                 app.UseAuthentication();
                 app.UseAuthorization();
 
-                // Регистрация контроллеров
+                // Register controllers and run the app
                 app.MapControllers();
                 app.Run();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
+                // Catch and log exceptions during startup
                 Console.WriteLine(ex.Message);
                 Console.ReadKey();
             }

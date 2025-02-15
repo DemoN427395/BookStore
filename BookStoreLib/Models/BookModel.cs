@@ -7,7 +7,7 @@ namespace BookStoreLib.Models;
 public class BookModel
 {
     [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)] // Автоинкремент
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)] // Autoincrement
     public int Id { get; set; }
 
     [Required]

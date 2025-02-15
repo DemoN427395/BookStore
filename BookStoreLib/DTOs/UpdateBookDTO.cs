@@ -1,4 +1,6 @@
-﻿namespace BookStoreLib.DTOs;
+﻿using Microsoft.AspNetCore.Http;
+
+namespace BookStoreLib.DTOs;
 
 public class UpdateBookDTO
 {
@@ -11,4 +13,5 @@ public class UpdateBookDTO
     public string? ISBN { get; set; }
     public int? Pages { get; set; }
     public string? Language { get; set; }
+    public IFormFile? File { get; set; }
 }

@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BookStoreLib.Migrations.User
 {
     /// <inheritdoc />
-    public partial class InitAuth : Migration
+    public partial class InitUser : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

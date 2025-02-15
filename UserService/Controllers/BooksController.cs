@@ -1,12 +1,10 @@
-﻿// Controllers/BooksController.cs
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using BookStoreLib.Models;
 using System.Security.Claims;
 using BookStoreLib.Data;
 using BookStoreLib.DTOs;
-using System.Net.Mime;
 
 namespace UserService.Controllers;
 
@@ -22,21 +20,21 @@ public class BooksController : ControllerBase
         _context = context;
     }
 
+    // Create a new book
     [HttpPost("create")]
     public async Task<IActionResult> CreateBook([FromForm] CreateBookDTO dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        // Проверка существования пользователя
         var userExists = await _context.AspNetUsers.AnyAsync(u => u.Id == userId);
         if (!userExists)
-            return BadRequest("User does not exist.");
+            return BadRequest(new { message = "User does not exist." });
 
         if (await _context.Books.AnyAsync(b => b.Title == dto.Title))
-            return BadRequest("Book with this name already exists");
+            return BadRequest(new { message = "Book with this name already exists" });
 
         if (await _context.Books.AnyAsync(b => b.ISBN == dto.ISBN))
-            return BadRequest("Book with this ISBN already exists");
+            return BadRequest(new { message = "Book with this ISBN already exists" });
 
         byte[]? fileContent = null;
         string? contentType = null;
@@ -68,28 +66,46 @@ public class BooksController : ControllerBase
 
         _context.Books.Add(newBook);
         await _context.SaveChangesAsync();
-        return Ok(newBook.Id);
+        return Ok(new { bookId = newBook.Id });
     }
 
 
-
     [HttpPatch("update")]
-    public async Task<IActionResult> UpdateBook([FromBody] UpdateBookDTO dto)
+    public async Task<IActionResult> UpdateBook([FromForm] UpdateBookDTO dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!await _context.AspNetUsers.AnyAsync(u => u.Id == userId))
+            return Unauthorized("User is not authorized.");
 
-        // 1. Проверка существования пользователя
-        var userExists = await _context.AspNetUsers.AnyAsync(u => u.Id == userId);
-        if (!userExists) return Unauthorized();
-
-        // 2. Находим книгу по ID из DTO
         var book = await _context.Books
             .FirstOrDefaultAsync(b => b.Id == dto.Id && b.UserId == userId);
-
         if (book == null)
-            return NotFound("Book not found or access denied");
+            return NotFound("Book not found or access denied.");
 
-        // 3. Обновляем только изменяемые поля
+        // Check for unique title
+        if (dto.Title != null && dto.Title != book.Title)
+        {
+            if (await _context.Books.AnyAsync(b => b.Title == dto.Title && b.Id != book.Id))
+                return BadRequest("A book with this title already exists.");
+        }
+
+        // Check for unique ISBN
+        if (dto.ISBN != null && dto.ISBN != book.ISBN)
+        {
+            if (await _context.Books.AnyAsync(b => b.ISBN == dto.ISBN && b.Id != book.Id))
+                return BadRequest("A book with this ISBN already exists.");
+        }
+
+        // Update the file if provided
+        if (dto.File != null)
+        {
+            using var memoryStream = new MemoryStream();
+            await dto.File.CopyToAsync(memoryStream);
+            book.FileContent = memoryStream.ToArray();
+            book.ContentType = dto.File.ContentType;
+        }
+
+        // Update other fields
         book.Title = dto.Title ?? book.Title;
         book.Author = dto.Author ?? book.Author;
         book.Genre = dto.Genre ?? book.Genre;
@@ -99,7 +115,6 @@ public class BooksController : ControllerBase
         book.Pages = dto.Pages ?? book.Pages;
         book.Language = dto.Language ?? book.Language;
 
-        // 4. Сохраняем изменения
         try
         {
             await _context.SaveChangesAsync();
@@ -107,73 +122,69 @@ public class BooksController : ControllerBase
         }
         catch (DbUpdateException ex)
         {
-            return BadRequest($"Update failed: {ex.Message}");
+            return BadRequest($"Save error: {ex.Message}");
         }
     }
 
+
+    // Delete a book
     [HttpDelete("delete")]
     public async Task<IActionResult> DeleteBook([FromBody] DeleteBookDTO dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
-            return Unauthorized();
+            return Unauthorized(new { message = "User is unauthorized" });
 
-        // Проверка существования пользователя
         var userExists = await _context.AspNetUsers.AnyAsync(u => u.Id == userId);
         if (!userExists)
-            return Unauthorized();
+            return Unauthorized(new { message = "User does not exist" });
 
-        // Поиск книги по ID и UserId
         var book = await _context.Books.FirstOrDefaultAsync(b => b.Id == dto.Id && b.UserId == userId);
         if (book == null)
-            return NotFound("Book not found or access denied");
+            return NotFound(new { message = "Book not found or access denied" });
 
         try
         {
             _context.Books.Remove(book);
             await _context.SaveChangesAsync();
-            return Ok("Book deleted successfully");
+            return Ok(new { message = "Book deleted successfully" });
         }
         catch (Exception ex)
         {
-            // Здесь можно добавить логирование ошибки ex
-            return StatusCode(500, "An error occurred while deleting the book.");
+            return StatusCode(500, new { message = $"An error occurred: {ex.Message}" });
         }
     }
 
+    // Download book file by ID
     [AllowAnonymous]
     [HttpGet("download/id={id}")]
     public async Task<IActionResult> DownloadBookFile([FromRoute] int id)
     {
         try
         {
-            // Поиск книги в БД
             var book = await _context.Books
                 .Where(b => b.Id == id)
                 .Select(b => new { b.Title, b.FileContent, b.ContentType })
                 .FirstOrDefaultAsync();
 
             if (book == null)
-                return NotFound($"Book with ID {id} not found.");
+                return NotFound(new { message = $"Book with ID {id} not found." });
 
             if (book.FileContent == null || book.FileContent.Length == 0)
-                return NotFound($"File for book with ID {id} not found.");
+                return NotFound(new { message = $"File for book with ID {id} not found." });
 
-            // Определение имени файла
             var fileName = string.IsNullOrWhiteSpace(book.Title) ? $"book_{id}.pdf" : $"{book.Title}.pdf";
             var contentType = string.IsNullOrWhiteSpace(book.ContentType) ? "application/octet-stream" : book.ContentType;
 
-            // Возвращаем файл
             return File(book.FileContent, contentType, fileName);
         }
         catch (Exception ex)
         {
-            return StatusCode(500, $"An error occurred: {ex.Message}");
+            return StatusCode(500, new { message = $"An error occurred: {ex.Message}" });
         }
     }
 
-
-
+    // Get random books
     [HttpGet]
     [AllowAnonymous]
     public async Task<IActionResult> GetRandomBooks()
@@ -202,8 +213,7 @@ public class BooksController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(ex);
+            return BadRequest(new { message = ex.Message });
         }
     }
-
 }

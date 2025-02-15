@@ -3,17 +3,19 @@ using BookStoreLib.Models;
 
 namespace BookStoreLib.Data;
 
+// DbContext for the User database, managing books
 public class UserDbContext : DbContext
 {
     public UserDbContext(DbContextOptions<UserDbContext> options) : base(options) { }
 
     public DbSet<BookModel> Books { get; set; }
 
+    // Configuring the model for Book entities
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("books");
 
-        // Настройка Books
+        // Configure BookModel entity
         modelBuilder.Entity<BookModel>(entity =>
         {
             entity.ToTable("Books");
@@ -21,10 +23,9 @@ public class UserDbContext : DbContext
             entity.Property(b => b.UserId).IsRequired();
             entity.HasIndex(b => b.Title).IsUnique();
             entity.HasIndex(b => b.ISBN).IsUnique();
-
         });
 
-        // Настройка для чтения AspNetUsers (если требуется)
+        // Configure ApplicationUser entity for AspNetUsers (if needed)
         modelBuilder.Entity<ApplicationUser>(entity =>
         {
             entity.ToTable("AspNetUsers", "user", t => t.ExcludeFromMigrations())

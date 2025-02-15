@@ -19,7 +19,6 @@ public class UsersController : ControllerBase
     private readonly ITokenService _tokenService;
     private readonly AuthDbContext _context;
 
-
     public UsersController(UserManager<ApplicationUser> userManager,
         RoleManager<IdentityRole> roleManager,
         ILogger<AuthController> logger,
@@ -32,14 +31,12 @@ public class UsersController : ControllerBase
         _context = context;
     }
 
-
     [HttpGet("me")]
     [Authorize]
     public async Task<IActionResult> GetCurrentUserId()
     {
         try
         {
-            // Получаем ID пользователя из Claims
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (string.IsNullOrEmpty(userId))
@@ -47,7 +44,6 @@ public class UsersController : ControllerBase
                 return Unauthorized(new { message = "User ID not found in claims." });
             }
 
-            // Ищем пользователя в базе данных
             var user = await _context.Users.FindAsync(userId);
 
             if (user == null)

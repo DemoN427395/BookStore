@@ -5,9 +5,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BookStoreLib.Models;
 
-[Table("AspNetUsers", Schema = "user")] // Указываем схему "auth"
+[Table("AspNetUsers", Schema = "user")] // Set scheme "user"
 public class ApplicationUser : IdentityUser
 {
     public string Name { get; set; }
-    // Другие поля, если нужны (но только для чтения!)
 }

@@ -30,7 +30,6 @@ public class AuthController : ControllerBase
         _logger = logger;
         _tokenService = tokenService;
         _context = context;
-
     }
 
     [HttpPost("signup")]
@@ -44,23 +43,20 @@ public class AuthController : ControllerBase
                 return BadRequest(new { message = "User already exists" });
             }
 
-            // Create User role if it doesn't exist
-            if ((await _roleManager.RoleExistsAsync(Roles.User)) == false)
+            if (!(await _roleManager.RoleExistsAsync(Roles.User)))
             {
-                var roleResult = await _roleManager
-                      .CreateAsync(new IdentityRole(Roles.User));
+                var roleResult = await _roleManager.CreateAsync(new IdentityRole(Roles.User));
 
-                if (roleResult.Succeeded == false)
+                if (!roleResult.Succeeded)
                 {
-                    var roleErros = roleResult.Errors.Select(e => e.Description);
-                    _logger.LogError($"Failed to create user role. Errors : {string.Join(",", roleErros)}");
-                    return BadRequest($"Failed to create user role. Errors : {string.Join(",", roleErros)}");
+                    var roleErrors = roleResult.Errors.Select(e => e.Description);
+                    _logger.LogError($"Failed to create user role. Errors: {string.Join(",", roleErrors)}");
+                    return BadRequest(new { message = $"Failed to create user role. Errors: {string.Join(",", roleErrors)}" });
                 }
             }
 
             ApplicationUser user = new()
             {
-
                 Email = model.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.Email,
@@ -70,28 +66,26 @@ public class AuthController : ControllerBase
 
             var createUserResult = await _userManager.CreateAsync(user, model.Password);
 
-            if (createUserResult.Succeeded == false)
+            if (!createUserResult.Succeeded)
             {
                 var errors = createUserResult.Errors.Select(e => e.Description);
-                _logger.LogError(
-                    $"Failed to create user. Errors: {string.Join(", ", errors)}"
-                );
-                return BadRequest($"Failed to create user. Errors: {string.Join(", ", errors)}");
+                _logger.LogError($"Failed to create user. Errors: {string.Join(", ", errors)}");
+                return BadRequest(new { message = $"Failed to create user. Errors: {string.Join(", ", errors)}" });
             }
 
-            var addUserToRoleResult = await _userManager.AddToRoleAsync(user: user, role: Roles.User);
+            var addUserToRoleResult = await _userManager.AddToRoleAsync(user, Roles.User);
 
-            if (addUserToRoleResult.Succeeded == false)
+            if (!addUserToRoleResult.Succeeded)
             {
                 var errors = addUserToRoleResult.Errors.Select(e => e.Description);
-                _logger.LogError($"Failed to add role to the user. Errors : {string.Join(",", errors)}");
+                _logger.LogError($"Failed to add role to user. Errors: {string.Join(",", errors)}");
             }
-            return CreatedAtAction(nameof(Signup), new { id = model.Name }, model);
 
+            return CreatedAtAction(nameof(Signup), new { id = model.Name }, model);
         }
         catch (Exception ex)
         {
-            return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            return StatusCode(StatusCodes.Status500InternalServerError, new { message = ex.Message });
         }
     }
 
@@ -103,34 +97,32 @@ public class AuthController : ControllerBase
             var user = await _userManager.FindByNameAsync(model.Email);
             if (user == null)
             {
-                return BadRequest("User with this username is not registered with us.");
-            }
-            bool isValidPassword = await _userManager.CheckPasswordAsync(user, model.Password);
-            if (isValidPassword == false)
-            {
-                return Unauthorized();
+                return BadRequest(new { message = "User not registered." });
             }
 
-            List<Claim> authClaims = [
+            bool isValidPassword = await _userManager.CheckPasswordAsync(user, model.Password);
+            if (!isValidPassword)
+            {
+                return Unauthorized(new { message = "Invalid credentials." });
+            }
+
+            List<Claim> authClaims = new()
+            {
                 new (ClaimTypes.Name, user.UserName),
                 new (ClaimTypes.NameIdentifier, user.Id),
-                new (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        ];
+                new (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
 
             var userRoles = await _userManager.GetRolesAsync(user);
-
             foreach (var userRole in userRoles)
             {
                 authClaims.Add(new Claim(ClaimTypes.Role, userRole));
             }
 
             var token = _tokenService.GenerateAccessToken(authClaims);
-
             string refreshToken = _tokenService.GenerateRefreshToken();
 
-            var tokenInfo = _context.TokenInfos.
-                        FirstOrDefault(a => a.Username == user.UserName);
-
+            var tokenInfo = _context.TokenInfos.FirstOrDefault(a => a.Username == user.UserName);
             if (tokenInfo == null)
             {
                 var ti = new TokenInfo
@@ -139,9 +131,8 @@ public class AuthController : ControllerBase
                     RefreshToken = refreshToken,
                     ExpiredAt = DateTime.UtcNow.AddDays(7)
                 };
-                _context.TokenInfos.Add(ti);    
+                _context.TokenInfos.Add(ti);
             }
-            // Else, update the refresh token and expiration
             else
             {
                 tokenInfo.RefreshToken = refreshToken;
@@ -150,43 +141,12 @@ public class AuthController : ControllerBase
 
             await _context.SaveChangesAsync();
 
-            return Ok(new TokenModel
-            {
-                AccessToken = token,
-                RefreshToken = refreshToken
-            });
+            return Ok(new { accessToken = token, refreshToken = refreshToken });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex.Message);
-            return Unauthorized();
-        }
-
-    }
-
-    [HttpPost("token/revoke")]
-    [Authorize]
-    public async Task<IActionResult> Revoke()
-    {
-        try
-        {
-            var username = User.Identity.Name;
-
-            var user = _context.TokenInfos.SingleOrDefault(u => u.Username == username);
-            if (user == null)
-            {
-                return BadRequest();
-            }
-
-            user.RefreshToken = string.Empty;
-            await _context.SaveChangesAsync();
-
-            return Ok(true);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex.Message);
-            return StatusCode(StatusCodes.Status500InternalServerError);
+            return Unauthorized(new { message = "An error occurred during login." });
         }
     }
 }

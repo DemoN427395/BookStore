@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BookStoreLib.Migrations.User
 {
     [DbContext(typeof(AuthDbContext))]
-    [Migration("20250215131059_InitAuth")]
-    partial class InitAuth
+    [Migration("20250215154414_InitUser")]
+    partial class InitUser
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

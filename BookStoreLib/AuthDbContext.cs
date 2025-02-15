@@ -4,26 +4,27 @@ using BookStoreLib.Models;
 
 namespace BookStoreLib.Data;
 
+// DbContext for Authentication and Token information
 public class AuthDbContext : IdentityDbContext<ApplicationUser>
 {
     public AuthDbContext(DbContextOptions<AuthDbContext> options) : base(options) { }
 
     public DbSet<TokenInfo> TokenInfos { get; set; }
 
+    // Configure the models for AuthDbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.HasDefaultSchema("user");
 
-        // Настройка для ApplicationUser
+        // Configure ApplicationUser entity
         modelBuilder.Entity<ApplicationUser>(entity =>
         {
             entity.ToTable("AspNetUsers");
-            // Добавьте дополнительные настройки для новых полей
             entity.Property(u => u.Name).HasMaxLength(100);
         });
 
-        // Настройка для TokenInfo
+        // Configure TokenInfo entity
         modelBuilder.Entity<TokenInfo>()
             .ToTable("TokenInfos");
     }
