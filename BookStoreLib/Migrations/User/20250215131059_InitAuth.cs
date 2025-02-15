@@ -4,7 +4,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace BookStoreLib.Migrations.Auth
+namespace BookStoreLib.Migrations.User
 {
     /// <inheritdoc />
     public partial class InitAuth : Migration

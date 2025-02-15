@@ -41,10 +41,6 @@ namespace UserService
                 });
                 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-                // // Используем UserDbContext из библиотеки
-                // builder.Services.AddDbContext<UserDbContext>(options =>
-                //     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-
                 // UserDbContext
                 builder.Services.AddDbContext<UserDbContext>(options =>
                     options.UseNpgsql(connectionString, b =>

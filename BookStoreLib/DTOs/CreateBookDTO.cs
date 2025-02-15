@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Http;
+using System.ComponentModel.DataAnnotations;
 
 namespace BookStoreLib.DTOs;
 
@@ -28,4 +29,5 @@ public class CreateBookDTO
     [Required]
     public string Language { get; set; } = string.Empty;
 
+    public IFormFile? File { get; set; }
 }

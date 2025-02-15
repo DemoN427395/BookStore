@@ -9,10 +9,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace BookStoreLib.Migrations.Auth
+namespace BookStoreLib.Migrations.User
 {
     [DbContext(typeof(AuthDbContext))]
-    [Migration("20250215115021_InitAuth")]
+    [Migration("20250215131059_InitAuth")]
     partial class InitAuth
     {
         /// <inheritdoc />

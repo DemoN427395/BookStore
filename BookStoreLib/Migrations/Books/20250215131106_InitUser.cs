@@ -3,7 +3,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace BookStoreLib.Migrations.User
+namespace BookStoreLib.Migrations.Books
 {
     /// <inheritdoc />
     public partial class InitUser : Migration
@@ -29,7 +29,9 @@ namespace BookStoreLib.Migrations.User
                     ISBN = table.Column<string>(type: "text", nullable: false),
                     Pages = table.Column<int>(type: "integer", nullable: false),
                     Language = table.Column<string>(type: "text", nullable: false),
-                    UserId = table.Column<string>(type: "text", nullable: false)
+                    UserId = table.Column<string>(type: "text", nullable: false),
+                    FileContent = table.Column<byte[]>(type: "bytea", nullable: true),
+                    ContentType = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {

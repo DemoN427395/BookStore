@@ -1,10 +1,7 @@
 ﻿// Controllers/UserController.cs
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using BookStoreLib.Models;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using System.Net.Http.Headers;
 using UserService.Services;
 

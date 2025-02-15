@@ -6,6 +6,7 @@ using BookStoreLib.Models;
 using System.Security.Claims;
 using BookStoreLib.Data;
 using BookStoreLib.DTOs;
+using System.Net.Mime;
 
 namespace UserService.Controllers;
 
@@ -22,22 +23,33 @@ public class BooksController : ControllerBase
     }
 
     [HttpPost("create")]
-    public async Task<IActionResult> CreateBook([FromBody] CreateBookDTO dto)
+    public async Task<IActionResult> CreateBook([FromForm] CreateBookDTO dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        // Проверка существования пользователя (только чтение)
-        var userExists = await _context.AspNetUsers
-            .AnyAsync(u => u.Id == userId);
-
+        // Проверка существования пользователя
+        var userExists = await _context.AspNetUsers.AnyAsync(u => u.Id == userId);
         if (!userExists)
             return BadRequest("User does not exist.");
 
         if (await _context.Books.AnyAsync(b => b.Title == dto.Title))
-            return BadRequest("Book with this name exist");
+            return BadRequest("Book with this name already exists");
 
         if (await _context.Books.AnyAsync(b => b.ISBN == dto.ISBN))
-            return BadRequest("Book with this ISBN exist");
+            return BadRequest("Book with this ISBN already exists");
+
+        byte[]? fileContent = null;
+        string? contentType = null;
+
+        if (dto.File != null)
+        {
+            using (var memoryStream = new MemoryStream())
+            {
+                await dto.File.CopyToAsync(memoryStream);
+                fileContent = memoryStream.ToArray();
+                contentType = dto.File.ContentType;
+            }
+        }
 
         var newBook = new BookModel
         {
@@ -49,13 +61,17 @@ public class BooksController : ControllerBase
             ISBN = dto.ISBN,
             Pages = dto.Pages,
             Language = dto.Language,
-            UserId = userId
+            UserId = userId,
+            FileContent = fileContent,
+            ContentType = contentType
         };
 
         _context.Books.Add(newBook);
         await _context.SaveChangesAsync();
         return Ok(newBook.Id);
     }
+
+
 
     [HttpPatch("update")]
     public async Task<IActionResult> UpdateBook([FromBody] UpdateBookDTO dto)
@@ -125,6 +141,39 @@ public class BooksController : ControllerBase
         }
     }
 
+    [AllowAnonymous]
+    [HttpGet("download/id={id}")]
+    public async Task<IActionResult> DownloadBookFile([FromRoute] int id)
+    {
+        try
+        {
+            // Поиск книги в БД
+            var book = await _context.Books
+                .Where(b => b.Id == id)
+                .Select(b => new { b.Title, b.FileContent, b.ContentType })
+                .FirstOrDefaultAsync();
+
+            if (book == null)
+                return NotFound($"Book with ID {id} not found.");
+
+            if (book.FileContent == null || book.FileContent.Length == 0)
+                return NotFound($"File for book with ID {id} not found.");
+
+            // Определение имени файла
+            var fileName = string.IsNullOrWhiteSpace(book.Title) ? $"book_{id}.pdf" : $"{book.Title}.pdf";
+            var contentType = string.IsNullOrWhiteSpace(book.ContentType) ? "application/octet-stream" : book.ContentType;
+
+            // Возвращаем файл
+            return File(book.FileContent, contentType, fileName);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"An error occurred: {ex.Message}");
+        }
+    }
+
+
+
     [HttpGet]
     [AllowAnonymous]
     public async Task<IActionResult> GetRandomBooks()
@@ -134,13 +183,27 @@ public class BooksController : ControllerBase
             var books = await _context.Books
                 .OrderBy(b => Guid.NewGuid())
                 .Take(5)
+                .Select(b => new
+                {
+                    b.Id,
+                    b.Title,
+                    b.Author,
+                    b.Genre,
+                    b.Year,
+                    b.Publisher,
+                    b.ISBN,
+                    b.Pages,
+                    b.Language,
+                    b.UserId
+                })
                 .ToListAsync();
 
             return Ok(books);
         }
         catch (Exception ex)
         {
-            return (BadRequest(ex));
+            return BadRequest(ex);
         }
     }
+
 }

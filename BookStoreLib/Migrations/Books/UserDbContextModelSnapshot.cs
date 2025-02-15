@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace BookStoreLib.Migrations.User
+namespace BookStoreLib.Migrations.Books
 {
     [DbContext(typeof(UserDbContext))]
     partial class UserDbContextModelSnapshot : ModelSnapshot
@@ -74,7 +74,7 @@ namespace BookStoreLib.Migrations.User
                     b.Property<string>("UserName")
                         .HasColumnType("text");
 
-                    b.ToTable("AspNetUsers", "auth", t =>
+                    b.ToTable("AspNetUsers", "user", t =>
                         {
                             t.ExcludeFromMigrations();
                         });
@@ -91,6 +91,12 @@ namespace BookStoreLib.Migrations.User
                     b.Property<string>("Author")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<string>("ContentType")
+                        .HasColumnType("text");
+
+                    b.Property<byte[]>("FileContent")
+                        .HasColumnType("bytea");
 
                     b.Property<string>("Genre")
                         .IsRequired()

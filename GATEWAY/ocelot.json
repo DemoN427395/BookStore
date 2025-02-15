@@ -109,6 +109,18 @@
       "UpstreamHttpMethod": [ "DELETE" ]
     },
     {
+      "DownstreamPathTemplate": "/api/books/download/id={id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5001
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/books/download/id={id}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
       "DownstreamPathTemplate": "/api/user/me",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [

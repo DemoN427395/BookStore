@@ -36,4 +36,8 @@ public class BookModel
 
     [Required]
     public string UserId { get; set; } = string.Empty;
+
+    public byte[]? FileContent { get; set; }
+
+    public string? ContentType { get; set; }
 }
