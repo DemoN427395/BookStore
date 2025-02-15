@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BookStoreLib.Migrations.User
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20250214224553_InitUser")]
+    [Migration("20250215115051_InitUser")]
     partial class InitUser
     {
         /// <inheritdoc />
@@ -20,7 +20,7 @@ namespace BookStoreLib.Migrations.User
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasDefaultSchema("user")
+                .HasDefaultSchema("books")
                 .HasAnnotation("ProductVersion", "9.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
@@ -133,7 +133,7 @@ namespace BookStoreLib.Migrations.User
                     b.HasIndex("Title")
                         .IsUnique();
 
-                    b.ToTable("Books", "user");
+                    b.ToTable("Books", "books");
                 });
 #pragma warning restore 612, 618
         }

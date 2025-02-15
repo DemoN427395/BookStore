@@ -12,11 +12,11 @@ namespace BookStoreLib.Migrations.User
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.EnsureSchema(
-                name: "user");
+                name: "books");
 
             migrationBuilder.CreateTable(
                 name: "Books",
-                schema: "user",
+                schema: "books",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -38,14 +38,14 @@ namespace BookStoreLib.Migrations.User
 
             migrationBuilder.CreateIndex(
                 name: "IX_Books_ISBN",
-                schema: "user",
+                schema: "books",
                 table: "Books",
                 column: "ISBN",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Books_Title",
-                schema: "user",
+                schema: "books",
                 table: "Books",
                 column: "Title",
                 unique: true);
@@ -56,7 +56,7 @@ namespace BookStoreLib.Migrations.User
         {
             migrationBuilder.DropTable(
                 name: "Books",
-                schema: "user");
+                schema: "books");
         }
     }
 }

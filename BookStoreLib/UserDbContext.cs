@@ -11,7 +11,7 @@ public class UserDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.HasDefaultSchema("user");
+        modelBuilder.HasDefaultSchema("books");
 
         // Настройка Books
         modelBuilder.Entity<BookModel>(entity =>
@@ -27,7 +27,7 @@ public class UserDbContext : DbContext
         // Настройка для чтения AspNetUsers (если требуется)
         modelBuilder.Entity<ApplicationUser>(entity =>
         {
-            entity.ToTable("AspNetUsers", "auth", t => t.ExcludeFromMigrations())
+            entity.ToTable("AspNetUsers", "user", t => t.ExcludeFromMigrations())
                 .HasNoKey();
         });
     }

@@ -11,6 +11,7 @@ namespace UserService.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class BooksController : ControllerBase
 {
     private readonly UserDbContext _context;
@@ -21,7 +22,6 @@ public class BooksController : ControllerBase
     }
 
     [HttpPost("create")]
-    [Authorize]
     public async Task<IActionResult> CreateBook([FromBody] CreateBookDTO dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -57,7 +57,76 @@ public class BooksController : ControllerBase
         return Ok(newBook.Id);
     }
 
+    [HttpPatch("update")]
+    public async Task<IActionResult> UpdateBook([FromBody] UpdateBookDTO dto)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        // 1. Проверка существования пользователя
+        var userExists = await _context.AspNetUsers.AnyAsync(u => u.Id == userId);
+        if (!userExists) return Unauthorized();
+
+        // 2. Находим книгу по ID из DTO
+        var book = await _context.Books
+            .FirstOrDefaultAsync(b => b.Id == dto.Id && b.UserId == userId);
+
+        if (book == null)
+            return NotFound("Book not found or access denied");
+
+        // 3. Обновляем только изменяемые поля
+        book.Title = dto.Title ?? book.Title;
+        book.Author = dto.Author ?? book.Author;
+        book.Genre = dto.Genre ?? book.Genre;
+        book.Year = dto.Year ?? book.Year;
+        book.Publisher = dto.Publisher ?? book.Publisher;
+        book.ISBN = dto.ISBN ?? book.ISBN;
+        book.Pages = dto.Pages ?? book.Pages;
+        book.Language = dto.Language ?? book.Language;
+
+        // 4. Сохраняем изменения
+        try
+        {
+            await _context.SaveChangesAsync();
+            return Ok(book);
+        }
+        catch (DbUpdateException ex)
+        {
+            return BadRequest($"Update failed: {ex.Message}");
+        }
+    }
+
+    [HttpDelete("delete")]
+    public async Task<IActionResult> DeleteBook([FromBody] DeleteBookDTO dto)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
+
+        // Проверка существования пользователя
+        var userExists = await _context.AspNetUsers.AnyAsync(u => u.Id == userId);
+        if (!userExists)
+            return Unauthorized();
+
+        // Поиск книги по ID и UserId
+        var book = await _context.Books.FirstOrDefaultAsync(b => b.Id == dto.Id && b.UserId == userId);
+        if (book == null)
+            return NotFound("Book not found or access denied");
+
+        try
+        {
+            _context.Books.Remove(book);
+            await _context.SaveChangesAsync();
+            return Ok("Book deleted successfully");
+        }
+        catch (Exception ex)
+        {
+            // Здесь можно добавить логирование ошибки ex
+            return StatusCode(500, "An error occurred while deleting the book.");
+        }
+    }
+
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> GetRandomBooks()
     {
         try

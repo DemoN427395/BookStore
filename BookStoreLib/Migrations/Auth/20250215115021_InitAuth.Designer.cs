@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BookStoreLib.Migrations.Auth
 {
     [DbContext(typeof(AuthDbContext))]
-    [Migration("20250214223718_InitAuth")]
+    [Migration("20250215115021_InitAuth")]
     partial class InitAuth
     {
         /// <inheritdoc />
@@ -20,7 +20,7 @@ namespace BookStoreLib.Migrations.Auth
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasDefaultSchema("auth")
+                .HasDefaultSchema("user")
                 .HasAnnotation("ProductVersion", "9.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
@@ -92,7 +92,7 @@ namespace BookStoreLib.Migrations.Auth
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
 
-                    b.ToTable("AspNetUsers", "auth");
+                    b.ToTable("AspNetUsers", "user");
                 });
 
             modelBuilder.Entity("BookStoreLib.Models.TokenInfo", b =>
@@ -118,7 +118,7 @@ namespace BookStoreLib.Migrations.Auth
 
                     b.HasKey("Id");
 
-                    b.ToTable("TokenInfos", "auth");
+                    b.ToTable("TokenInfos", "user");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -144,7 +144,7 @@ namespace BookStoreLib.Migrations.Auth
                         .IsUnique()
                         .HasDatabaseName("RoleNameIndex");
 
-                    b.ToTable("AspNetRoles", "auth");
+                    b.ToTable("AspNetRoles", "user");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -169,7 +169,7 @@ namespace BookStoreLib.Migrations.Auth
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("AspNetRoleClaims", "auth");
+                    b.ToTable("AspNetRoleClaims", "user");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -194,7 +194,7 @@ namespace BookStoreLib.Migrations.Auth
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AspNetUserClaims", "auth");
+                    b.ToTable("AspNetUserClaims", "user");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
@@ -216,7 +216,7 @@ namespace BookStoreLib.Migrations.Auth
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AspNetUserLogins", "auth");
+                    b.ToTable("AspNetUserLogins", "user");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
@@ -231,7 +231,7 @@ namespace BookStoreLib.Migrations.Auth
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("AspNetUserRoles", "auth");
+                    b.ToTable("AspNetUserRoles", "user");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -250,7 +250,7 @@ namespace BookStoreLib.Migrations.Auth
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
-                    b.ToTable("AspNetUserTokens", "auth");
+                    b.ToTable("AspNetUserTokens", "user");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

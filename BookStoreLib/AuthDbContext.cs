@@ -13,7 +13,7 @@ public class AuthDbContext : IdentityDbContext<ApplicationUser>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        modelBuilder.HasDefaultSchema("auth");
+        modelBuilder.HasDefaultSchema("user");
 
         // Настройка для ApplicationUser
         modelBuilder.Entity<ApplicationUser>(entity =>

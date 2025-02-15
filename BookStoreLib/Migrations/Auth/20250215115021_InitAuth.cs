@@ -13,11 +13,11 @@ namespace BookStoreLib.Migrations.Auth
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.EnsureSchema(
-                name: "auth");
+                name: "user");
 
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
-                schema: "auth",
+                schema: "user",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
@@ -32,7 +32,7 @@ namespace BookStoreLib.Migrations.Auth
 
             migrationBuilder.CreateTable(
                 name: "AspNetUsers",
-                schema: "auth",
+                schema: "user",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
@@ -59,7 +59,7 @@ namespace BookStoreLib.Migrations.Auth
 
             migrationBuilder.CreateTable(
                 name: "TokenInfos",
-                schema: "auth",
+                schema: "user",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -75,7 +75,7 @@ namespace BookStoreLib.Migrations.Auth
 
             migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
-                schema: "auth",
+                schema: "user",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -90,7 +90,7 @@ namespace BookStoreLib.Migrations.Auth
                     table.ForeignKey(
                         name: "FK_AspNetRoleClaims_AspNetRoles_RoleId",
                         column: x => x.RoleId,
-                        principalSchema: "auth",
+                        principalSchema: "user",
                         principalTable: "AspNetRoles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -98,7 +98,7 @@ namespace BookStoreLib.Migrations.Auth
 
             migrationBuilder.CreateTable(
                 name: "AspNetUserClaims",
-                schema: "auth",
+                schema: "user",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -113,7 +113,7 @@ namespace BookStoreLib.Migrations.Auth
                     table.ForeignKey(
                         name: "FK_AspNetUserClaims_AspNetUsers_UserId",
                         column: x => x.UserId,
-                        principalSchema: "auth",
+                        principalSchema: "user",
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -121,7 +121,7 @@ namespace BookStoreLib.Migrations.Auth
 
             migrationBuilder.CreateTable(
                 name: "AspNetUserLogins",
-                schema: "auth",
+                schema: "user",
                 columns: table => new
                 {
                     LoginProvider = table.Column<string>(type: "text", nullable: false),
@@ -135,7 +135,7 @@ namespace BookStoreLib.Migrations.Auth
                     table.ForeignKey(
                         name: "FK_AspNetUserLogins_AspNetUsers_UserId",
                         column: x => x.UserId,
-                        principalSchema: "auth",
+                        principalSchema: "user",
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -143,7 +143,7 @@ namespace BookStoreLib.Migrations.Auth
 
             migrationBuilder.CreateTable(
                 name: "AspNetUserRoles",
-                schema: "auth",
+                schema: "user",
                 columns: table => new
                 {
                     UserId = table.Column<string>(type: "text", nullable: false),
@@ -155,14 +155,14 @@ namespace BookStoreLib.Migrations.Auth
                     table.ForeignKey(
                         name: "FK_AspNetUserRoles_AspNetRoles_RoleId",
                         column: x => x.RoleId,
-                        principalSchema: "auth",
+                        principalSchema: "user",
                         principalTable: "AspNetRoles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_AspNetUserRoles_AspNetUsers_UserId",
                         column: x => x.UserId,
-                        principalSchema: "auth",
+                        principalSchema: "user",
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -170,7 +170,7 @@ namespace BookStoreLib.Migrations.Auth
 
             migrationBuilder.CreateTable(
                 name: "AspNetUserTokens",
-                schema: "auth",
+                schema: "user",
                 columns: table => new
                 {
                     UserId = table.Column<string>(type: "text", nullable: false),
@@ -184,7 +184,7 @@ namespace BookStoreLib.Migrations.Auth
                     table.ForeignKey(
                         name: "FK_AspNetUserTokens_AspNetUsers_UserId",
                         column: x => x.UserId,
-                        principalSchema: "auth",
+                        principalSchema: "user",
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -192,44 +192,44 @@ namespace BookStoreLib.Migrations.Auth
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
-                schema: "auth",
+                schema: "user",
                 table: "AspNetRoleClaims",
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
                 name: "RoleNameIndex",
-                schema: "auth",
+                schema: "user",
                 table: "AspNetRoles",
                 column: "NormalizedName",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserClaims_UserId",
-                schema: "auth",
+                schema: "user",
                 table: "AspNetUserClaims",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserLogins_UserId",
-                schema: "auth",
+                schema: "user",
                 table: "AspNetUserLogins",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserRoles_RoleId",
-                schema: "auth",
+                schema: "user",
                 table: "AspNetUserRoles",
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
                 name: "EmailIndex",
-                schema: "auth",
+                schema: "user",
                 table: "AspNetUsers",
                 column: "NormalizedEmail");
 
             migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
-                schema: "auth",
+                schema: "user",
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true);
@@ -240,35 +240,35 @@ namespace BookStoreLib.Migrations.Auth
         {
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims",
-                schema: "auth");
+                schema: "user");
 
             migrationBuilder.DropTable(
                 name: "AspNetUserClaims",
-                schema: "auth");
+                schema: "user");
 
             migrationBuilder.DropTable(
                 name: "AspNetUserLogins",
-                schema: "auth");
+                schema: "user");
 
             migrationBuilder.DropTable(
                 name: "AspNetUserRoles",
-                schema: "auth");
+                schema: "user");
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens",
-                schema: "auth");
+                schema: "user");
 
             migrationBuilder.DropTable(
                 name: "TokenInfos",
-                schema: "auth");
+                schema: "user");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles",
-                schema: "auth");
+                schema: "user");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers",
-                schema: "auth");
+                schema: "user");
         }
     }
 }

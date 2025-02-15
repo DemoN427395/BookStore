@@ -20,17 +20,6 @@ namespace AuthTokenService
                 var builder = WebApplication.CreateBuilder(args);
                 builder.Services.AddControllers();
 
-                // Добавление политики CORS, разрешающей все источники
-                // builder.Services.AddCors(options =>
-                // {
-                //     options.AddPolicy("AllowAll", policy =>
-                //     {
-                //         policy.AllowAnyOrigin()
-                //             .AllowAnyHeader()
-                //             .AllowAnyMethod();
-                //     });
-                // });
-
                 builder.Services.AddCors(options =>
                 {
                     options.AddPolicy("AllowAll", policy =>
@@ -45,16 +34,6 @@ namespace AuthTokenService
                 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
                 builder.Services.AddHostedService<MigrationHostedService>();
-
-                // builder.Services.AddDbContext<AuthDbContext>(options =>
-                //     options.UseNpgsql(connectionString));
-
-                // builder.Services.AddDbContext<AuthDbContext>(options =>
-                //     options.UseNpgsql(
-                //         builder.Configuration.GetConnectionString("DefaultConnection"),
-                //         b => b.MigrationsAssembly("BookStoreLib") // Контекст находится в библиотеке
-                //     )
-                // );
 
 
                 builder.Services.AddDbContext<AuthDbContext>(options =>
