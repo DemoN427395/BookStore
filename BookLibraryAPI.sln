@@ -3,12 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.12.35707.178
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService", "UserService\UserService.csproj", "{DF53D68E-A5E9-415E-9D7B-73EB0C713C45}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookService", "BookService\BookService.csproj", "{DF53D68E-A5E9-415E-9D7B-73EB0C713C45}"
 	ProjectSection(ProjectDependencies) = postProject
 		{50DB498F-56D0-4AF1-B0A4-705796CB155F} = {50DB498F-56D0-4AF1-B0A4-705796CB155F}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthTokenService", "AuthTokenService\AuthTokenService.csproj", "{1E24D778-1B25-4C6E-9DEE-36882021A3DB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthUserTokenService", "AuthUserTokenService\AuthUserTokenService.csproj", "{1E24D778-1B25-4C6E-9DEE-36882021A3DB}"
 	ProjectSection(ProjectDependencies) = postProject
 		{50DB498F-56D0-4AF1-B0A4-705796CB155F} = {50DB498F-56D0-4AF1-B0A4-705796CB155F}
 	EndProjectSection

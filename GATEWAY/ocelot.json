@@ -37,18 +37,6 @@
       "UpstreamHttpMethod": [ "POST" ]
     },
     {
-      "DownstreamPathTemplate": "/api/users/test",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5000
-        }
-      ],
-      "UpstreamPathTemplate": "/gateway/users/test",
-      "UpstreamHttpMethod": [ "GET" ]
-    },
-    {
       "DownstreamPathTemplate": "/api/users/me",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
@@ -97,7 +85,7 @@
       "UpstreamHttpMethod": [ "PATCH" ]
     },
     {
-      "DownstreamPathTemplate": "/api/books/delete",
+      "DownstreamPathTemplate": "/api/books/delete/id={id}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -105,7 +93,7 @@
           "Port": 5001
         }
       ],
-      "UpstreamPathTemplate": "/gateway/books/delete",
+      "UpstreamPathTemplate": "/gateway/books/delete/id={id}",
       "UpstreamHttpMethod": [ "DELETE" ]
     },
     {
@@ -121,7 +109,7 @@
       "UpstreamHttpMethod": [ "GET" ]
     },
     {
-      "DownstreamPathTemplate": "/api/user/me",
+      "DownstreamPathTemplate": "/api/books/search/id={id}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -129,7 +117,7 @@
           "Port": 5001
         }
       ],
-      "UpstreamPathTemplate": "/gateway/user/me",
+      "UpstreamPathTemplate": "/gateway/books/search/id={id}",
       "UpstreamHttpMethod": [ "GET" ]
     }
   ],

@@ -81,7 +81,7 @@ public class AuthController : ControllerBase
                 _logger.LogError($"Failed to add role to user. Errors: {string.Join(",", errors)}");
             }
 
-            return CreatedAtAction(nameof(Signup), new { id = model.Name }, model);
+            return CreatedAtAction(nameof(Signup), new { id = model.Name }, new { Message = "User registered successfully" } );
         }
         catch (Exception ex)
         {
@@ -147,6 +147,32 @@ public class AuthController : ControllerBase
         {
             _logger.LogError(ex.Message);
             return Unauthorized(new { message = "An error occurred during login." });
+        }
+    }
+    
+    [HttpPost("token/revoke")]
+    [Authorize]
+    public async Task<IActionResult> Revoke()
+    {
+        try
+        {
+            var username = User.Identity.Name;
+
+            var user = _context.TokenInfos.SingleOrDefault(u => u.Username == username);
+            if (user == null)
+            {
+                return BadRequest();
+            }
+
+            user.RefreshToken = string.Empty;
+            await _context.SaveChangesAsync();
+
+            return Ok(true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
+            return StatusCode(StatusCodes.Status500InternalServerError);
         }
     }
 }

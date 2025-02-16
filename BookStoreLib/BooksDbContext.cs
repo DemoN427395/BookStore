@@ -4,9 +4,9 @@ using BookStoreLib.Models;
 namespace BookStoreLib.Data;
 
 // DbContext for the User database, managing books
-public class UserDbContext : DbContext
+public class BooksDbContext : DbContext
 {
-    public UserDbContext(DbContextOptions<UserDbContext> options) : base(options) { }
+    public BooksDbContext(DbContextOptions<BooksDbContext> options) : base(options) { }
 
     public DbSet<BookModel> Books { get; set; }
 

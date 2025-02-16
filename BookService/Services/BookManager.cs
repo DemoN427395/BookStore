@@ -4,12 +4,12 @@ using BookStoreLib.Data;
 namespace UserService.Services;
 public class BookManager
 {
-    private readonly UserDbContext _dbContext;
+    private readonly BooksDbContext _dbContext;
     private readonly AuthServiceClient _authServiceClient;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     public BookManager(
-        UserDbContext dbContext,
+        BooksDbContext dbContext,
         AuthServiceClient authServiceClient,
         IHttpContextAccessor httpContextAccessor)
     {

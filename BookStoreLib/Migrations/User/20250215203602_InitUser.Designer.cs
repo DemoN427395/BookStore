@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BookStoreLib.Migrations.User
 {
     [DbContext(typeof(AuthDbContext))]
-    [Migration("20250215154414_InitUser")]
+    [Migration("20250215203602_InitUser")]
     partial class InitUser
     {
         /// <inheritdoc />

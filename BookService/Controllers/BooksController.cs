@@ -13,9 +13,9 @@ namespace UserService.Controllers;
 [Authorize]
 public class BooksController : ControllerBase
 {
-    private readonly UserDbContext _context;
+    private readonly BooksDbContext _context;
 
-    public BooksController(UserDbContext context)
+    public BooksController(BooksDbContext context)
     {
         _context = context;
     }
@@ -66,7 +66,8 @@ public class BooksController : ControllerBase
 
         _context.Books.Add(newBook);
         await _context.SaveChangesAsync();
-        return Ok(new { bookId = newBook.Id });
+        // return Ok(new { bookId = newBook.Id });
+        return Ok(newBook);
     }
 
 
@@ -128,8 +129,8 @@ public class BooksController : ControllerBase
 
 
     // Delete a book
-    [HttpDelete("delete")]
-    public async Task<IActionResult> DeleteBook([FromBody] DeleteBookDTO dto)
+    [HttpDelete("delete/id={id}")]
+    public async Task<IActionResult> DeleteBook([FromRoute] int id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
@@ -139,9 +140,11 @@ public class BooksController : ControllerBase
         if (!userExists)
             return Unauthorized(new { message = "User does not exist" });
 
-        var book = await _context.Books.FirstOrDefaultAsync(b => b.Id == dto.Id && b.UserId == userId);
+        // var book = await _context.Books.FirstOrDefaultAsync(b => b.Id == dto.Id && b.UserId == userId);
+        var book = await _context.Books.FirstOrDefaultAsync(b => b.Id == id);
         if (book == null)
-            return NotFound(new { message = "Book not found or access denied" });
+            return NotFound(new { message = $"Book with id {id} not found" });
+
 
         try
         {
@@ -156,7 +159,7 @@ public class BooksController : ControllerBase
     }
 
     // Download book file by ID
-    [AllowAnonymous]
+    // [AllowAnonymous]
     [HttpGet("download/id={id}")]
     public async Task<IActionResult> DownloadBookFile([FromRoute] int id)
     {
@@ -185,8 +188,8 @@ public class BooksController : ControllerBase
     }
 
     // Get random books
-    [HttpGet]
     [AllowAnonymous]
+    [HttpGet]
     public async Task<IActionResult> GetRandomBooks()
     {
         try
@@ -210,6 +213,41 @@ public class BooksController : ControllerBase
                 .ToListAsync();
 
             return Ok(books);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    // Search book
+    [AllowAnonymous]
+    [HttpGet("search/id={id}")]
+    public async Task<IActionResult> SearchBook([FromRoute] int id)
+    {
+        try
+        {
+            var book = await _context.Books
+                .Where(b => b.Id == id)
+                .Select(b => new
+                {
+                    b.Id,
+                    b.Title,
+                    b.Author,
+                    b.Genre,
+                    b.Year,
+                    b.Publisher,
+                    b.ISBN,
+                    b.Pages,
+                    b.Language,
+                    b.UserId
+                })
+                .FirstOrDefaultAsync();
+
+            if (book == null)
+                return NotFound(new { message = $"Book with ID {id} not found." });
+
+            return Ok(book);
         }
         catch (Exception ex)
         {

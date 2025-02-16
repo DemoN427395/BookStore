@@ -11,8 +11,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace BookStoreLib.Migrations.Books
 {
-    [DbContext(typeof(UserDbContext))]
-    [Migration("20250215154420_InitBooks")]
+    [DbContext(typeof(BooksDbContext))]
+    [Migration("20250215203634_InitBooks")]
     partial class InitBooks
     {
         /// <inheritdoc />

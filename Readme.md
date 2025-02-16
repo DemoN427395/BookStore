@@ -18,16 +18,14 @@ dotnet user-secrets set "JWT:secret" "your-32-characters-long-super-strong-jwt-s
 ```
 
 ```bash
-dotnet ef migrations add InitAuth --context AuthDbContext --startup-project AuthTokenService --project BookStoreLib --output-dir "Migrations/Auth"
-
+dotnet ef migrations add InitUser --context AuthDbContext --startup-project AuthTokenService --project BookStoreLib --output-dir "Migrations/User"
 dotnet ef database update --context AuthDbContext --startup-project AuthTokenService --project BookStoreLib
 ```
 
 ## Установка UserService
 
 ```bash
-dotnet ef migrations add InitUser --context UserDbContext --startup-project UserService --project BookStoreLib --output-dir "Migrations/User"
-
+dotnet ef migrations add InitBooks --context UserDbContext --startup-project UserService --project BookStoreLib --output-dir "Migrations/Books"
 dotnet ef database update --context UserDbContext --startup-project UserService --project BookStoreLib
 ```
 

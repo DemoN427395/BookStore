@@ -44,7 +44,7 @@ public class UserService
 
             // Database configuration using PostgreSQL
             string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-            builder.Services.AddDbContext<UserDbContext>(options =>
+            builder.Services.AddDbContext<BooksDbContext>(options =>
                 options.UseNpgsql(connectionString, b =>
                 {
                     b.MigrationsAssembly("BookStoreLib");
@@ -82,7 +82,7 @@ public class UserService
             // Apply migrations
             using (var scope = app.Services.CreateScope())
             {
-                var context = scope.ServiceProvider.GetRequiredService<UserDbContext>();
+                var context = scope.ServiceProvider.GetRequiredService<BooksDbContext>();
                 context.Database.Migrate();
             }
 
