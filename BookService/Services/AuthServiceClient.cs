@@ -1,7 +1,7 @@
-﻿using BookStoreLib.Models;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
+using BookStoreLib.Models;
 
-namespace UserService.Services;
+namespace BookService.Services;
 public class AuthServiceClient
 {
     private readonly HttpClient _httpClient;

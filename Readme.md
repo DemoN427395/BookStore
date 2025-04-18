@@ -22,11 +22,11 @@ dotnet ef migrations add InitUser --context AuthDbContext --startup-project Auth
 dotnet ef database update --context AuthDbContext --startup-project AuthTokenService --project BookStoreLib
 ```
 
-## Установка UserService
+## Установка BookService
 
 ```bash
-dotnet ef migrations add InitBooks --context UserDbContext --startup-project UserService --project BookStoreLib --output-dir "Migrations/Books"
-dotnet ef database update --context UserDbContext --startup-project UserService --project BookStoreLib
+dotnet ef migrations add InitBooks --context BooksDbContext --startup-project BookService --project BookStoreLib --output-dir "Migrations/Books"
+dotnet ef database update --context BooksDbContext --startup-project BookService --project BookStoreLib
 ```
 
 ## **Описание API эндпоинтов:**

@@ -1,13 +1,12 @@
 using System.Text;
 using AuthTokenService.Services;
+using BookStoreLib.Data;
+using BookStoreLib.Interfaces;
+using BookStoreLib.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-
-using BookStoreLib.Data;
-using BookStoreLib.Interfaces;
-using BookStoreLib.Models;
 
 namespace AuthTokenService
 {
@@ -15,6 +14,7 @@ namespace AuthTokenService
     {
         public static void Main(string[] args)
         {
+            Console.Title = "AuthTokenService";
             try
             {
                 var builder = WebApplication.CreateBuilder(args);

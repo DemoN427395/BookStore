@@ -1,8 +1,8 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 
-namespace GATEAWAY;
+namespace GATEWAY;
 
 public class Startup
 {
@@ -17,6 +17,11 @@ public class Startup
     {
         services.AddControllers();
         services.AddOcelot(Configuration);
+        services.Configure<KestrelServerOptions>(options =>
+        {
+            options.AllowSynchronousIO = true;
+            options.Limits.MaxRequestBodySize = int.MaxValue;
+        });
 
         services.AddLogging(loggingBuilder =>
         {

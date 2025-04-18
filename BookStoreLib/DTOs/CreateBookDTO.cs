@@ -30,4 +30,5 @@ public class CreateBookDTO
     public string Language { get; set; } = string.Empty;
 
     public IFormFile? File { get; set; }
+    public IFormFile? CoverFile { get; set; }
 }

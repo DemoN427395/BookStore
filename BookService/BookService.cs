@@ -1,16 +1,17 @@
 using System.Text;
+using BookService.Services;
+using BookStoreLib.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using BookStoreLib.Data;
-using Microsoft.AspNetCore.Http.Features;
-using UserService.Services;
 
-namespace UserService;
-public class UserService
+namespace BookService;
+public class BookService
 {
     public static void Main(string[] args)
     {
+        Console.Title = "BookService";
         try
         {
             var builder = WebApplication.CreateBuilder(args);
@@ -37,13 +38,9 @@ public class UserService
                 client.BaseAddress = new Uri("https://localhost:5000");
             });
 
-            builder.Services.Configure<FormOptions>(options =>
-            {
-                options.MultipartBodyLengthLimit = 104857600;
-            });
-
             // Database configuration using PostgreSQL
             string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+            
             builder.Services.AddDbContext<BooksDbContext>(options =>
                 options.UseNpgsql(connectionString, b =>
                 {

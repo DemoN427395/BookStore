@@ -30,7 +30,8 @@ namespace BookStoreLib.Migrations.Books
                     Pages = table.Column<int>(type: "integer", nullable: false),
                     Language = table.Column<string>(type: "text", nullable: false),
                     UserId = table.Column<string>(type: "text", nullable: false),
-                    FileContent = table.Column<byte[]>(type: "bytea", nullable: true),
+                    FilePath = table.Column<string>(type: "text", nullable: true),
+                    CoverFilePath = table.Column<string>(type: "text", nullable: true),
                     ContentType = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>

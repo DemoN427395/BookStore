@@ -1,7 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
-using BookStoreLib.Data;
+﻿using BookStoreLib.Data;
+using Microsoft.EntityFrameworkCore;
 
-namespace UserService.Services;
+namespace BookService.Services;
 public class BookManager
 {
     private readonly BooksDbContext _dbContext;

@@ -14,4 +14,5 @@ public class UpdateBookDTO
     public int? Pages { get; set; }
     public string? Language { get; set; }
     public IFormFile? File { get; set; }
+    public IFormFile? CoverFile { get; set; }
 }

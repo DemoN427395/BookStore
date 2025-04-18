@@ -1,18 +1,19 @@
-﻿using AuthTokenService.Constants;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+﻿using System.Security.Claims;
+using AuthTokenService.Constants;
+using AuthTokenService.Interfaces;
 using BookStoreLib.Data;
 using BookStoreLib.Interfaces;
 using BookStoreLib.Models;
-using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace AuthTokenService.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class AuthController : ControllerBase
+public class AuthController : ControllerBase, IAuthController
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;

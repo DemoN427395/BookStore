@@ -95,8 +95,11 @@ namespace BookStoreLib.Migrations.Books
                     b.Property<string>("ContentType")
                         .HasColumnType("text");
 
-                    b.Property<byte[]>("FileContent")
-                        .HasColumnType("bytea");
+                    b.Property<string>("CoverFilePath")
+                        .HasColumnType("text");
+
+                    b.Property<string>("FilePath")
+                        .HasColumnType("text");
 
                     b.Property<string>("Genre")
                         .IsRequired()

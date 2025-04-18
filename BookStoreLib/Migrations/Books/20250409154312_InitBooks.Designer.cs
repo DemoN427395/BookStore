@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BookStoreLib.Migrations.Books
 {
     [DbContext(typeof(BooksDbContext))]
-    [Migration("20250215203634_InitBooks")]
+    [Migration("20250409154312_InitBooks")]
     partial class InitBooks
     {
         /// <inheritdoc />
@@ -98,8 +98,11 @@ namespace BookStoreLib.Migrations.Books
                     b.Property<string>("ContentType")
                         .HasColumnType("text");
 
-                    b.Property<byte[]>("FileContent")
-                        .HasColumnType("bytea");
+                    b.Property<string>("CoverFilePath")
+                        .HasColumnType("text");
+
+                    b.Property<string>("FilePath")
+                        .HasColumnType("text");
 
                     b.Property<string>("Genre")
                         .IsRequired()

@@ -8,7 +8,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookService", "BookService\
 		{50DB498F-56D0-4AF1-B0A4-705796CB155F} = {50DB498F-56D0-4AF1-B0A4-705796CB155F}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthUserTokenService", "AuthUserTokenService\AuthUserTokenService.csproj", "{1E24D778-1B25-4C6E-9DEE-36882021A3DB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthTokenService", "AuthTokenService\AuthTokenService.csproj", "{1E24D778-1B25-4C6E-9DEE-36882021A3DB}"
 	ProjectSection(ProjectDependencies) = postProject
 		{50DB498F-56D0-4AF1-B0A4-705796CB155F} = {50DB498F-56D0-4AF1-B0A4-705796CB155F}
 	EndProjectSection

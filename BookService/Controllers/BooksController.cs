@@ -1,23 +1,49 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
-using BookStoreLib.Models;
-using System.Security.Claims;
+﻿using System.Security.Claims;
+using BookService.Classes;
+using BookService.Interfaces;
 using BookStoreLib.Data;
 using BookStoreLib.DTOs;
+using BookStoreLib.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
-namespace UserService.Controllers;
+namespace BookService.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
-public class BooksController : ControllerBase
+// [Authorize]
+[RequestSizeLimit(int.MaxValue)]
+public class BooksController : ControllerBase, IBooksController
 {
+    private readonly HashManagerClass _hashManagerClass = new HashManagerClass();
+
+    private readonly ILogger<BooksController> _logger;
     private readonly BooksDbContext _context;
 
-    public BooksController(BooksDbContext context)
+    private string? _fileHash = null;
+    private string? _coverFileHash = null;
+    // private readonly string _storagePath;
+
+    public string StoragePath { get; }
+    public string BooksPath { get; }
+    public string BookCoversPath { get; }
+
+    public BookModel DeleteBookModel { get; private set; }
+
+    public BooksController(BooksDbContext context, ILogger<BooksController> logger)
     {
         _context = context;
+        _logger = logger;
+
+        StoragePath = Path.Combine(Directory.GetCurrentDirectory(), "MediaFiles");
+        Directory.CreateDirectory(StoragePath);
+
+        BooksPath = Path.Combine(StoragePath, "Books");
+        Directory.CreateDirectory(BooksPath);
+
+        BookCoversPath = Path.Combine(StoragePath, "Book covers");
+        Directory.CreateDirectory(BookCoversPath);
     }
 
     // Create a new book
@@ -36,17 +62,48 @@ public class BooksController : ControllerBase
         if (await _context.Books.AnyAsync(b => b.ISBN == dto.ISBN))
             return BadRequest(new { message = "Book with this ISBN already exists" });
 
-        byte[]? fileContent = null;
+        string? filePath = null;
+        string? coverFilePath = null;
         string? contentType = null;
 
         if (dto.File != null)
         {
-            using (var memoryStream = new MemoryStream())
+
+            using (var stream = new MemoryStream())
             {
-                await dto.File.CopyToAsync(memoryStream);
-                fileContent = memoryStream.ToArray();
-                contentType = dto.File.ContentType;
+                await dto.File.CopyToAsync(stream);
+                _fileHash = await _hashManagerClass.ComputeHashFromMemoryStreamAsync(stream);
             }
+
+            // Генерируем уникальное имя файла с сохранением оригинального расширения
+            var uniqueFileName = $"{_fileHash}{Path.GetExtension(dto.File.FileName)}";
+            var fullFilePath = Path.Combine(BooksPath, uniqueFileName);
+
+            // Сохраняем файл на диск
+            using (var stream = new FileStream(fullFilePath, FileMode.Create))
+            {
+                await dto.File.CopyToAsync(stream);
+            }
+
+            filePath = uniqueFileName;
+            contentType = dto.File.ContentType;
+        }
+
+        if (dto.CoverFile != null)
+        {
+            using (var stream = new MemoryStream())
+            {
+                await dto.CoverFile.CopyToAsync(stream);
+                _coverFileHash = await _hashManagerClass.ComputeHashFromMemoryStreamAsync(stream);
+            }
+
+            var uniqueCoverFileName = $"{_coverFileHash}{Path.GetExtension(dto.CoverFile.FileName)}";
+            var fullCoverFilePath = Path.Combine(BookCoversPath, uniqueCoverFileName);
+            using (var stream = new FileStream(fullCoverFilePath, FileMode.Create))
+            {
+                await dto.CoverFile.CopyToAsync(stream);
+            }
+            coverFilePath = uniqueCoverFileName;
         }
 
         var newBook = new BookModel
@@ -60,15 +117,17 @@ public class BooksController : ControllerBase
             Pages = dto.Pages,
             Language = dto.Language,
             UserId = userId,
-            FileContent = fileContent,
+            FilePath = filePath,
+            CoverFilePath = coverFilePath,
             ContentType = contentType
         };
 
         _context.Books.Add(newBook);
         await _context.SaveChangesAsync();
-        // return Ok(new { bookId = newBook.Id });
+
         return Ok(newBook);
     }
+
 
 
     [HttpPatch("update")]
@@ -83,30 +142,79 @@ public class BooksController : ControllerBase
         if (book == null)
             return NotFound("Book not found or access denied.");
 
-        // Check for unique title
+        // Проверка на уникальность заголовка
         if (dto.Title != null && dto.Title != book.Title)
         {
             if (await _context.Books.AnyAsync(b => b.Title == dto.Title && b.Id != book.Id))
                 return BadRequest("A book with this title already exists.");
         }
 
-        // Check for unique ISBN
+        // Проверка на уникальность ISBN
         if (dto.ISBN != null && dto.ISBN != book.ISBN)
         {
             if (await _context.Books.AnyAsync(b => b.ISBN == dto.ISBN && b.Id != book.Id))
                 return BadRequest("A book with this ISBN already exists.");
         }
 
-        // Update the file if provided
+        // Если передан новый файл – обновляем медиа
         if (dto.File != null)
         {
-            using var memoryStream = new MemoryStream();
-            await dto.File.CopyToAsync(memoryStream);
-            book.FileContent = memoryStream.ToArray();
+            // Если ранее был сохранён файл, удаляем его
+            if (!string.IsNullOrEmpty(book.FilePath))
+            {
+                var oldFilePath = Path.Combine(BooksPath, book.FilePath);
+                if (System.IO.File.Exists(oldFilePath))
+                {
+                    System.IO.File.Delete(oldFilePath);
+                }
+            }
+
+            using (var stream = new MemoryStream())
+            {
+                await dto.File.CopyToAsync(stream);
+                _fileHash = await _hashManagerClass.ComputeHashFromMemoryStreamAsync(stream);
+            }
+
+            // Генерируем уникальное имя файла с сохранением оригинального расширения
+            var uniqueFileName = $"{_fileHash}{Path.GetExtension(dto.File.FileName)}";
+            var fullFilePath = Path.Combine(BooksPath, uniqueFileName);
+            
+            using (var stream = new FileStream(fullFilePath, FileMode.Create))
+            {
+                await dto.File.CopyToAsync(stream);
+            }
+
+            book.FilePath = uniqueFileName;
             book.ContentType = dto.File.ContentType;
         }
 
-        // Update other fields
+        if (dto.CoverFile != null)
+        {
+            // Если ранее был сохранён файл, удаляем его
+            if (!string.IsNullOrEmpty(book.CoverFilePath))
+            {
+                var oldCoverFilePath = Path.Combine(BookCoversPath, book.CoverFilePath);
+                if (System.IO.File.Exists(oldCoverFilePath))
+                {
+                    System.IO.File.Delete(oldCoverFilePath);
+                }
+            }
+            using (var stream = new MemoryStream())
+            {
+                await dto.CoverFile.CopyToAsync(stream);
+                _coverFileHash = await _hashManagerClass.ComputeHashFromMemoryStreamAsync(stream);
+            }
+            var uniqueCoverFileName = $"{_coverFileHash}{Path.GetExtension(dto.CoverFile.FileName)}";
+            var fullCoverFilePath = Path.Combine(BookCoversPath, uniqueCoverFileName);
+
+            using (var stream = new FileStream(fullCoverFilePath, FileMode.Create))
+            {
+                await dto.CoverFile.CopyToAsync(stream);
+            }
+            book.CoverFilePath = uniqueCoverFileName;
+        }
+
+        // Обновляем остальные поля
         book.Title = dto.Title ?? book.Title;
         book.Author = dto.Author ?? book.Author;
         book.Genre = dto.Genre ?? book.Genre;
@@ -128,6 +236,7 @@ public class BooksController : ControllerBase
     }
 
 
+
     // Delete a book
     [HttpDelete("delete/id={id}")]
     public async Task<IActionResult> DeleteBook([FromRoute] int id)
@@ -145,11 +254,33 @@ public class BooksController : ControllerBase
         if (book == null)
             return NotFound(new { message = $"Book with id {id} not found" });
 
-
         try
         {
+            DeleteBookModel = book;
+
             _context.Books.Remove(book);
             await _context.SaveChangesAsync();
+
+            // Удаляем файл с диска, если он существует
+            using (var stream = new MemoryStream())
+            {
+                if (!string.IsNullOrEmpty(book.FilePath))
+                {
+                    var filePath = Path.Combine(BooksPath, book.FilePath);
+                    if (System.IO.File.Exists(filePath))
+                    {
+                        System.IO.File.Delete(filePath);
+                    }
+                }
+                if (!string.IsNullOrEmpty(book.CoverFilePath))
+                {
+                    var coverFilePath = Path.Combine(BookCoversPath, book.CoverFilePath);
+                    if (System.IO.File.Exists(coverFilePath))
+                    {
+                        System.IO.File.Delete(coverFilePath);
+                    }
+                }
+            }
             return Ok(new { message = "Book deleted successfully" });
         }
         catch (Exception ex)
@@ -159,7 +290,7 @@ public class BooksController : ControllerBase
     }
 
     // Download book file by ID
-    // [AllowAnonymous]
+    [AllowAnonymous]
     [HttpGet("download/id={id}")]
     public async Task<IActionResult> DownloadBookFile([FromRoute] int id)
     {
@@ -167,25 +298,31 @@ public class BooksController : ControllerBase
         {
             var book = await _context.Books
                 .Where(b => b.Id == id)
-                .Select(b => new { b.Title, b.FileContent, b.ContentType })
+                .Select(b => new { b.Title, b.FilePath, b.ContentType })
                 .FirstOrDefaultAsync();
 
             if (book == null)
                 return NotFound(new { message = $"Book with ID {id} not found." });
 
-            if (book.FileContent == null || book.FileContent.Length == 0)
+            if (string.IsNullOrEmpty(book.FilePath))
                 return NotFound(new { message = $"File for book with ID {id} not found." });
+
+            var fullFilePath = Path.Combine(BooksPath, book.FilePath);
+            if (!System.IO.File.Exists(fullFilePath))
+                return NotFound(new { message = $"File for book with ID {id} not found on disk." });
 
             var fileName = string.IsNullOrWhiteSpace(book.Title) ? $"book_{id}.pdf" : $"{book.Title}.pdf";
             var contentType = string.IsNullOrWhiteSpace(book.ContentType) ? "application/octet-stream" : book.ContentType;
 
-            return File(book.FileContent, contentType, fileName);
+            var fileBytes = await System.IO.File.ReadAllBytesAsync(fullFilePath);
+            return File(fileBytes, contentType, fileName);
         }
         catch (Exception ex)
         {
             return StatusCode(500, new { message = $"An error occurred: {ex.Message}" });
         }
     }
+
 
     // Get random books
     [AllowAnonymous]
